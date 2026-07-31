@@ -118,9 +118,10 @@ $(function() {
     settings.condition_2_dislikes = [9999999];
 
     // Names that appear in the "X disliked your post" popups. Same rule as
-    // likes_by: every name must be a username in profiles.js for that party.
-    settings.dislikes_by_dem = ['Lauren', 'Arjen', 'Jane', 'Kim', 'Dan'];
-    settings.dislikes_by_rep = ['Lauren', 'Arjen', 'Jane', 'Kim', 'Dan'];
+    // likes_by: every name must be a username in profiles.js. All five are
+    // majority-role names - see §8. Every name exists identically in both
+    // party's profiles.js lists, so there is no dem/rep variant to pick.
+    settings.dislikes_by = ['Lauren', 'Arjen', 'Dan', 'Mary', 'Heather'];
 
     // Can a participant both like AND dislike the same post?
     // true = one reaction per post (clicking either disables both).
@@ -151,14 +152,16 @@ $(function() {
     // 6. WHO THE PARTICIPANT'S LIKES APPEAR TO COME FROM
     // ---------------------------------------------------------------
     // These names appear in the "X liked your post" popups. EVERY name
-    // here must also be a username of a profile in profiles.js for that
-    // party, or participants will get likes from people who are not in
-    // the group - an obvious tell.
+    // here must also be a username of a profile in profiles.js, or
+    // participants will get likes from people who are not in the group -
+    // an obvious tell.
     // The list is used in order, so the FIRST name is the one who likes
-    // the rejected participant's single post.
+    // the rejected participant's single post. Kim is first deliberately:
+    // she is the one minority-role reactor (see §8), so putting her first
+    // makes her the sole like-giver in condition 1, and one of the six in
+    // condition 2 - a consistent 5-majority/1-minority split either way.
 
-    settings.likes_by_dem = ['Dan', 'Anca', 'Niki', 'Mary', 'George', 'Heather'];
-    settings.likes_by_rep = ['Dan', 'Anca', 'Niki', 'Mary', 'George', 'Heather'];
+    settings.likes_by = ['Kim', 'Dan', 'Anca', 'Niki', 'George', 'Heather'];
 
     // ---------------------------------------------------------------
     // 7. SHUFFLE THE ORDER OF THE GROUP MEMBERS?
@@ -167,6 +170,30 @@ $(function() {
     // controls for position effects. (The original code intended to do
     // this but the shuffle silently did nothing - see SETUP.md.)
     settings.shuffle_profiles = true;
+
+    // ---------------------------------------------------------------
+    // 8. MAJORITY / MINORITY GROUP COMPOSITION (interaction source)
+    // ---------------------------------------------------------------
+    // The 11 group members are a mix of the majority party (whichever
+    // party gp resolves to - the "interaction source" manipulation) and a
+    // minority presence from the other party. Which specific people play
+    // which role is fixed here, independent of which party ends up being
+    // majority for a given participant - only their avatar (and the
+    // majority/minority label) changes per cell.
+    //
+    // Roster: 8 majority-role / 3 minority-role, an 8/3 split.
+    // Reactions to the participant: 5 majority-authored / 1 minority-
+    // authored out of every 6 (see likes_by/dislikes_by above), because
+    // Kim - the sole minority reactor - is deliberately first in likes_by.
+    //
+    // Sarah MUST stay in this list. She is also the compensating member
+    // at canonical position 1 (see §5 / adjust_to_condition()), and her
+    // artificially large received-like-count is deliberately anchored to
+    // whichever party is minority for a cell - minority has fewer people
+    // (3 vs 8), so this keeps total visible likes roughly proportionate
+    // across majority/minority instead of minority reading as simply
+    // "fewer people, fewer likes." Do not move her to majority-role.
+    settings.minority_role_names = ['Sarah', 'Kim', 'Jane'];
   }
 
   // ===================================================================
@@ -598,29 +625,45 @@ $(function() {
     }
   }
 
-  // --- Pick the right group of profiles ---------------------------------
+  // --- Build the mixed majority/minority group -----------------------------
+  // window.groupparty is the MAJORITY party (the interaction-source
+  // manipulation, driven by gp=in/out/dem/rep). Most of the 11 group
+  // members are that party; settings.minority_role_names names the few who
+  // are the other party instead - see set_settings() §8. Every username
+  // exists in both party lists in profiles.js with identical bios, so this
+  // is purely a per-person selection of which party's avatar to use.
   function load_profiles() {
     if (typeof window.profiles === 'undefined') {
       alert('Setup error: profiles.js did not load.');
       return;
     }
-    // Deep copy so that editing likes does not alter the master list.
-    window.others = JSON.parse(JSON.stringify(window.profiles[window.groupparty]));
+
+    var majorityParty = window.groupparty;
+    var minorityParty = (majorityParty === 'dem') ? 'rep' : 'dem';
+
+    // profiles.dem and profiles.rep list the same 11 usernames in the same
+    // order, so either can be used as the canonical order to walk.
+    var canonical = window.profiles.dem.posts;
+
+    window.others = { posts: canonical.map(function(entry) {
+      var party = (window.settings.minority_role_names.indexOf(entry.username) !== -1)
+                ? minorityParty
+                : majorityParty;
+      var source = window.profiles[party].posts.filter(function(p) {
+        return p.username === entry.username;
+      })[0];
+      // Deep copy so that editing likes does not alter the master list.
+      return JSON.parse(JSON.stringify(source));
+    }) };
   }
 
   // --- Apply the condition ----------------------------------------------
   function adjust_to_condition() {
 
-    // Which names appear in the "liked your post" popups depends on which
-    // group of profiles the participant is seeing.
-    window.settings.likes_by = (window.groupparty === 'rep')
-                             ? window.settings.likes_by_rep
-                             : window.settings.likes_by_dem;
-
-    window.settings.dislikes_by = (window.groupparty === 'rep')
-                                ? window.settings.dislikes_by_rep
-                                : window.settings.dislikes_by_dem;
-
+    // posts[1] is always Sarah (canonical position 1, load_profiles()
+    // preserves profiles.dem's order) - the compensating member. Because
+    // she's in minority_role_names, she's now always rendered with the
+    // minority party's avatar for this cell; see set_settings() §8 for why.
     switch (window.condition) {
       case 1: // REJECTED: few likes, many dislikes
         window.settings.condition_likes    = window.settings.condition_1_likes;

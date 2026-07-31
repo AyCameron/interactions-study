@@ -138,15 +138,25 @@ or better written, out-group rejection will look milder for Democrats for a
 reason that has nothing to do with party. Matching the two sets on length,
 topic, warmth and writing quality is no longer good practice, it is load-bearing.
 
-**In out-group cells the participant is visually the odd one out.** With one
-avatar per party, an out-group participant displays a different badge from all
-five group members, while an in-group participant displays the same one. That
-visual singularity is itself a mild exclusion cue, and it is present in the
-*included* out-group cell too. It is inherent to the design rather than a bug,
-but name it in your writeup: the out-group manipulation is party difference plus
-visual distinctiveness, not party difference alone. If you want to rule it out,
-a pilot with party shown as a text label beside the username and identical
-avatars throughout would separate the two.
+**The 11 group members are a majority/minority mix (8/3), not one uniform
+party** - `settings.minority_role_names` in `main.js` fixes which people play
+which role. This softens, but does not remove, the visual-singularity issue
+below: in an *out-group* cell the participant's own badge now matches the 3
+minority members instead of standing alone, while in an *in-group* cell the
+participant still blends into the 8-person majority. Note this in your writeup
+too - "out-group" no longer means "the only different badge in the room," it
+means "the badge shared by the minority."
+
+**In out-group cells the participant is visually distinct from the majority.**
+With one avatar per party, an out-group participant displays a different badge
+from the 8 majority members (though the same badge as the 3 minority members).
+That visual distinctiveness from the majority is itself a mild exclusion cue,
+and it is present in the *included* out-group cell too. It is inherent to the
+design rather than a bug, but name it in your writeup: the out-group
+manipulation is party difference plus visual distinctiveness from the majority,
+not party difference alone. If you want to rule it out, a pilot with party shown
+as a text label beside the username and identical avatars throughout would
+separate the two.
 
 ---
 
@@ -421,10 +431,14 @@ For each one, confirm:
 
 - [ ] The participant is assigned the correct party's avatar (or shown it for confirmation, if you turned the screen back on)
 - [ ] Your own post displays your chosen avatar, not a broken image
-- [ ] The five group members are the right party for that cell
-- [ ] In `gp=in` cells the participant's avatar matches the group's; in `gp=out`
-      cells it differs
-- [ ] Every reaction popup names someone from the correct party
+- [ ] Of the 11 group members, 8 show the majority party's avatar and 3 show
+      the minority party's (`settings.minority_role_names` in `main.js`) - not
+      all 11 the same
+- [ ] In `gp=in` cells the participant's avatar matches the 8 majority members;
+      in `gp=out` cells it matches the 3 minority members instead
+- [ ] Every reaction popup names someone from the correct party for their role
+      (majority or minority) - 5 of the 6 reactions are majority-authored, 1 is
+      minority-authored (Kim), in every cell
 - [ ] You count the likes you receive: 1 in condition 1, 6 in condition 2
 - [ ] You count the dislikes you receive: 5 in condition 1, 0 in condition 2
 - [ ] Dislike popups appear in red, like popups in green

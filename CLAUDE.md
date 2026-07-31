@@ -32,9 +32,8 @@ analysis. Prefer being conservative over being clever.
    participant party — eight cells.** `gp` accepts `in`/`out` (relative to the
    participant, which is what Qualtrics sends) or `dem`/`rep` (absolute).
    `window.grouptype` is derived from it and must keep being exported, because
-   the analysis keys on it. Reactions must always come from the party named by
-   `gp`: `likes_by_*` and `dislikes_by_*` are selected by `groupparty`, never by
-   the participant's own party. Do not change that wiring.
+   the analysis keys on it. `window.groupparty` is the **majority** party for
+   the cell (see 3b) — most reactions come from it, but not all.
 
 2. **Total reactions to the participant's post are held constant at 6.**
    Rejected = 1 like + 5 dislikes. Included = 6 likes + 0 dislikes. Only the
@@ -42,9 +41,22 @@ analysis. Prefer being conservative over being clever.
    recount both totals and say so explicitly in your reply.
 
 3. **Total likes visible on screen are held constant across conditions** via the
-   compensating group member at index 1 of `profiles.js`. Participant 1 + peer 9
-   = participant 6 + peer 4 = 10. Moving that member out of position 1 breaks
-   `adjust_to_condition()`.
+   compensating group member at canonical position 1 (Sarah). Participant 1 +
+   peer 9 = participant 6 + peer 4 = 10. Moving her out of position 1, or out of
+   `minority_role_names` (see 3b), breaks `adjust_to_condition()`.
+
+3b. **The 11 group members are a majority/minority mix, not one uniform party.**
+   `settings.minority_role_names` (§8 in `main.js`) fixes *which people* are
+   minority-role, independent of which party ends up being majority for a given
+   cell — only their avatar changes. Split is 8 majority / 3 minority. Of the 6
+   reactions the participant receives, 5 are majority-authored and 1 is
+   minority-authored (Kim, deliberately first in `likes_by`) in every condition.
+   Sarah MUST stay in `minority_role_names`: anchoring the compensating member's
+   inflated like-count to minority (the smaller subgroup, 3 vs 8) keeps total
+   visible likes roughly proportionate across majority/minority instead of
+   minority reading as simply "fewer people, fewer likes." Do not move her to
+   majority-role, and do not change the 8/3 or 5/6-1/6 splits as a side effect
+   of unrelated work.
 
 4. **`settings.compensate_dislikes` is deliberately `false`.** Turning it on
    introduces a downward-comparison confound in the inclusion condition. Do not
@@ -60,9 +72,11 @@ analysis. Prefer being conservative over being clever.
    attractive or better drawn than the other, party is confounded with
    likeability. Do not reintroduce per-person avatars without being asked.
 
-6. **Every name in `likes_by_*` and `dislikes_by_*` must be a `username` present
-   in the corresponding profile set.** A reaction from someone not on screen
-   gives away the deception.
+6. **Every name in `likes_by` and `dislikes_by` must be a `username` present in
+   `profiles.js`.** (These are no longer split by party — every username exists
+   identically in both the dem and rep lists, so one list now covers both; see
+   3b for the majority/minority split among them.) A reaction from someone not
+   on screen gives away the deception.
 
 7. **All external resources must load over `https://`.** Qualtrics is https and
    browsers block mixed content, which silently blanks the whole study.
