@@ -475,6 +475,11 @@ $(function() {
     // End of task
     setTimeout(function() {
 
+      // The countdown below runs its own independent animate-based tick that
+      // can lag behind real time (e.g. a backgrounded tab gets throttled).
+      // Flag it stopped so a late tick can't overwrite '00:00' after we set it.
+      $('#countdown').data('countdown-stopped', true);
+
       $(window).unbind('beforeunload');
       $('#final-msg').show();
       $('#final-continue').show();
@@ -698,15 +703,21 @@ $(function() {
       callBack: function() {}
     }, settings);
     return this.each(function() {
+      var $this = jQuery(this);
       if (!to && to != settings.endNumber) { to = settings.startNumber; }
-      jQuery(this).children('.secs').text(to);
-      jQuery(this).animate({ fontSize: settings.endFontSize }, settings.duration, "", function() {
+      $this.children('.secs').text(to);
+      $this.animate({ fontSize: settings.endFontSize }, settings.duration, "", function() {
+        // A throttled/backgrounded tab can deliver this tick long after the
+        // real end-of-task timer already fired and set the display to
+        // '00:00'. Once that happens the flag below is set, so bail instead
+        // of overwriting it with a stale count.
+        if ($this.data('countdown-stopped')) { return; }
         if (to > settings.endNumber + 1) {
-          jQuery(this).children('.secs').text(to - 1);
-          jQuery(this).countDown(settings, to - 1);
+          $this.children('.secs').text(to - 1);
+          $this.countDown(settings, to - 1);
           var minutes = Math.floor(to / 60);
           var seconds = to - minutes * 60;
-          jQuery(this).children('.cntr').text(pad(minutes.toString(), 2) + ':' + pad(seconds.toString(), 2));
+          $this.children('.cntr').text(pad(minutes.toString(), 2) + ':' + pad(seconds.toString(), 2));
         } else {
           settings.callBack(this);
         }
