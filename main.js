@@ -71,7 +71,7 @@ $(function() {
     // Security: the parent page we are allowed to send data to.
     // Set this to YOUR Qualtrics domain, exactly as it appears in the
     // address bar (no trailing slash). Leave as '*' only while testing.
-    settings.parentOrigin = 'https://YOURUNIVERSITY.qualtrics.com';
+    settings.parentOrigin = 'https://ncsu.yul1.qualtrics.com';
 
     // ---------------------------------------------------------------
     // 3. TASK LENGTH
