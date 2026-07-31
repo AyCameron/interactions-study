@@ -299,3 +299,15 @@ span.badge.badge-custom.userdislikes {
 .btn.disabled {
 	opacity: 0.45;
 }
+
+/* Party self-report options on the avatar screen */
+.party-option {
+	display: inline-block;
+	font-size: 16px;
+	margin: 6px 0;
+	cursor: pointer;
+}
+.party-option input {
+	margin-right: 8px;
+	vertical-align: middle;
+}

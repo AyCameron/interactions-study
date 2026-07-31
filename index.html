@@ -48,19 +48,18 @@ CHANGES FROM THE ORIGINAL:
 
 <!-- ============================ INTRO ============================ -->
 <div id="intro" style="display:none;" class="instr">
-  <h3>Welcome to this study</h3>
+  <h3>Welcome!</h3>
 
-  You will complete a number of simple tasks, together with other people, <br>
-  with whom you will be connected via the internet.
+  You will complete a number of simple tasks, together with other Democrats and <br>
+  Republicans from across the US, with whom you will be connected via the internet.
   <br><br>
-  First, all participants in the study will select personal "avatars" and <br>
-  write short texts to introduce themselves.
+  First, all participants in the study will select personal "avatars" and write <br>
+  short texts to introduce themselves.
   <br><br>
-  Before beginning the tasks, you will spend 3 minutes with the other <br>
-  people. During this time, you will be able to read and react to <br>
-  each-other's brief introductions.
+  Before beginning the tasks, you will spend 3 minutes with the other people. <br>
+  During this time, you will be able to read and react to each other's brief <br>
+  introductions. Specific instructions will follow.
   <br><br>
-  Specific instructions will follow.<br><br>
   <b>Thank you!</b><br><br>
   <button type="submit" id="submit_intro">Continue</button>
 </div>
@@ -77,13 +76,23 @@ CHANGES FROM THE ORIGINAL:
 
 
 <!-- =========================== AVATAR ============================ -->
-<div id="avatar" style="display:none;">
-  <h3>Your avatar</h3>
-  This is the avatar that will represent you during the group task.<br>
-  It shows the other people which party you identify with.
-  <br><br>
-  <div class="avatars"></div>
-  <br><button type="submit" id="submit_avatar">Continue</button>
+<div id="avatar" style="display:none;" class="instr">
+  <h3>Which do you identify as?</h3>
+
+  <label class="party-option"><input type="radio" name="partysr" value="dem"> Democrat</label><br>
+  <label class="party-option"><input type="radio" name="partysr" value="rep"> Republican</label>
+
+  <div id="avatar-assigned" style="display:none;">
+    <br>
+    Because this is a study of Democrats and Republicans, we have assigned you a <br>
+    <span id="party-word"></span> avatar based on what you selected. This is a way to keep the <br>
+    participants relatively anonymous and protect their specific identities.
+    <br><br>
+    This avatar will represent you during the group task.
+    <br><br>
+    <div class="avatars"></div>
+    <br><button type="submit" id="submit_avatar">Submit</button>
+  </div>
   <br><br>
 </div>
 
@@ -95,7 +104,7 @@ CHANGES FROM THE ORIGINAL:
   Write something you would like to tell about yourself - anything you want to share.
   <br><br>
   <textarea id="description" autocomplete="off"></textarea><br>
-  <span id="count">Characters left: 400</span><br><br>
+  <span id="count">240 characters required</span><br><br>
   <button type="submit" id="submit_text">Submit</button>
 </div>
 
@@ -104,20 +113,20 @@ CHANGES FROM THE ORIGINAL:
 <div id="fb_intro" style="display:none;" class="instr">
   <h3>Group Introduction</h3>
   Soon after connecting, you should be able to see the other people's descriptions. <br>
-  You can read and react to the short introduction they wrote about themselves by <br>
-  clicking either a "like" or a "dislike" button. Use "like" if you had a positive <br>
-  reaction to what somebody wrote, and "dislike" if you had a negative one. <br>
-  You can react once to each person. The other people can react to your <br>
-  introduction in the same way.
-  <br>
-  <br>
+  You can read and react to the short introduction they wrote about themselves, by <br>
+  clicking a "like" button (similar to the "like" button on Facebook, "favorite" on X, <br>
+  or &hearts; on Threads) or a "dislike" button (similar to downvote on X or Reddit).
+  <br><br>
   Even though your interaction is minimal, please try to form an impression of the <br>
   people in the group. Try to imagine them in real life - how they might look <br>
   or sound, what kind of people they are, how you would get along with them.
-  <br><br>The task will last 3 minutes and is very important to the study, so please be attentive,
-  <br>without switching pages, or doing unrelated tasks. Questions about the other people <br>might follow.
-  <br><br><b>If these instructions are clear, you can proceed to log in.</b><br>
-  <br>
+  <br><br>
+  The task will last 3 minutes and is very important to the study, so please be <br>
+  attentive. Questions about the other people might follow.
+  <br><br>
+  <b>If you have questions about these instructions, please ask the Research Assistant.</b><br>
+  Once these instructions are clear, you can proceed to log in.
+  <br><br>
   <button type="submit" id="submit_fb_intro">Log in</button>
 </div>
 
@@ -137,7 +146,13 @@ CHANGES FROM THE ORIGINAL:
 
 <!-- ============================ TASK ============================= -->
 <div id="task" style="display:none;">
-  <div id="countdown"><span class="secs" style="display: none;"></span>You can click "Like" or "Dislike" to react to somebody's description<br><br>time left:<br><span id="timer" class="cntr label label-info"></span>
+  <div id="countdown"><span class="secs" style="display: none;"></span>
+  You can click "Like" or "Dislike" to provide feedback on participants' descriptions<br><br>
+  time left:<br><span id="timer" class="cntr label label-info"></span>
+  <div id="final-msg" style="display:none;">
+    <br>Thank you for your participation in this social network.<br>
+    You will now return to Qualtrics to finish the remaining portion of the study.
+  </div>
   <br>
   <button type="submit" id='final-continue' style="display:none;">Continue</button>
   </div>

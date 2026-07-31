@@ -1,113 +1,194 @@
 // =====================================================================
-// GROUP MEMBER PROFILES  (partisan version)
+// GROUP MEMBER PROFILES
 // =====================================================================
-// This file defines TWO sets of fake group members: one Democratic set
-// and one Republican set. Which set a participant sees is decided by the
-// "gp" (group party) parameter in the study URL.
+// Eleven fake group members. The BIOS ARE IDENTICAL in the Democratic and
+// Republican versions - only the avatar differs. That is deliberate: it
+// holds every word of content constant across conditions, so the partisan
+// manipulation is carried entirely by the party badge and nothing else can
+// confound it. Do not add partisan wording to one set without adding a
+// matched cue to the other.
 //
 // Each profile has:
-//   avatar   - path to a 250x250 px image. In this version every profile
-//              uses the single avatar for its party, so all five entries
-//              point at the same file.
-//   username - the name shown on the post AND used in the "X liked your
-//              post" popups. Must match the names in settings.likes_by_*
-//   text     - the self-introduction, written on ONE line (no line breaks)
+//   avatar   - avatars/dem.png or avatars/rep.png (everyone shares one
+//              badge per party)
+//   username - shown on the post AND used in the reaction popups. Must
+//              match the names in settings.likes_by_* / dislikes_by_*
+//   text     - the self-introduction, on ONE line, no double quotes inside
 //   likes    - millisecond timepoints at which this member receives a like
-//   dislikes - millisecond timepoints at which this member receives a dislike
-//              (use [9999999] for "none" - that timepoint is never reached)
+//   dislikes - millisecond timepoints at which this member receives a
+//              dislike (use [9999999] for none - never reached)
 //
-// MATCHING RULE: the Democratic and Republican sets should be as similar
-// as possible on everything except the partisan cue - same number of
-// profiles, similar bio length, similar topics, similar warmth, similar
-// apparent age/gender mix. Otherwise you cannot tell whether an effect is
-// about party or about the people.
+// The member at INDEX 1 (Sarah) is the compensating member. Her likes are
+// overwritten by the code to hold the on-screen total constant across
+// conditions. Do not move her out of position 1.
 // =====================================================================
 
 window.profiles = {
 
-  // ------------------------- DEMOCRATIC GROUP -------------------------
+  // DEMOCRATIC GROUP - all eleven show the donkey badge
   "dem": {
     "posts": [
       {
         "avatar": "avatars/dem.png",
-        "username": "Georgeee",
-        "text": "REPLACE ME. I'm a 19 year old from Wisconsin. I volunteer with a progressive voter registration drive on campus, and outside of that I mostly listen to music, draw, and read way too much psychology.",
-        "likes": [45000, 50000, 110000, 150000], // 4
-        "dislikes": [55000] // 1
+        "username": "George",
+        "text": "I'm a 19 year old dude from Wisconsin (commence making fun of my accent). I love music. Besides music I like learning languages, psychology, drawing, and writing.",
+        "likes": [22000, 61000, 118000, 152000],
+        "dislikes": [9999999]
       },
+      // index 1 - COMPENSATING MEMBER, likes overwritten by the code
       {
-        // NOTE: this is the COMPENSATING member (index 1). Its likes are
-        // overwritten by the code to keep the on-screen total constant
-        // across conditions. Do not reorder it out of position 1 unless
-        // you also change adjust_to_condition() in main.js.
         "avatar": "avatars/dem.png",
         "username": "Sarah",
-        "text": "REPLACE ME. I'm Sarah, married with two grown kids. I spent my career helping young people with disabilities find work, and I've knocked doors for Democratic candidates in every election since I was in my twenties.",
-        "likes": [12000, 14000, 15000, 35000, 80000], // overwritten by code
-        "dislikes": [60000] // 1  (overwritten only if compensate_dislikes is on)
+        "text": "Let me introduce myself. I'm Sarah, married, and mother of two wonderful (grown up) children. My career has been a bit weird. Starting off as a graduate historian, I switched to an entirely different discipline: vocational rehabilitation counselor trying to help young people with disabilities to get a job. I've just retired and started spending more time on my hobbies, such as singing, reading, and playing volleyball.",
+        "likes": [12000, 14000, 15000, 35000],
+        "dislikes": [58000]
       },
       {
         "avatar": "avatars/dem.png",
-        "username": "John",
-        "text": "REPLACE ME. Hi all. I work in logistics, I have two dogs, and on weekends I'm usually hiking. Politically I'm a pretty standard liberal Democrat, though I try not to make it my whole personality.",
-        "likes": [20000, 60000, 95000, 140000], // 4
-        "dislikes": [9999999] // 0
+        "username": "Dan",
+        "text": "Hi there, I'm 57 years old, married, with two kids. I've been a computer programmer for about 30 years, but don't worry: I don't have the dusty haircut, oversized buttoned shirt and nerdie big frame glasses. Looking forward to working with you all.",
+        "likes": [30000, 74000, 129000],
+        "dislikes": [82000]
       },
       {
         "avatar": "avatars/dem.png",
-        "username": "AncaD",
-        "text": "REPLACE ME. Grad student, coffee enthusiast, terrible at cooking. I got into local politics through a campaign internship and now I can't stop reading about city budgets. Nice to meet everyone.",
-        "likes": [30000, 70000, 120000], // 3
-        "dislikes": [75000, 125000] // 2
+        "username": "Anca",
+        "text": "I am a Computer Science student, interested in Natural Language processing. Also a lover of loose leaf tea and a Semantic Web enthusiast. I'm curious about what this task is about.",
+        "likes": [26000, 88000, 141000, 166000],
+        "dislikes": [9999999]
+      },
+      {
+        "avatar": "avatars/dem.png",
+        "username": "Niki",
+        "text": "My life revolves around rock climbing. I started climbing when I was 12 (turning 19 soon) and usually climb 4-5 hours a day. Climbing never bores me, because each time is different - the routes, the weather, my strength and endurance. It's great!",
+        "likes": [19000, 47000, 96000, 134000, 158000],
+        "dislikes": [9999999]
+      },
+      {
+        "avatar": "avatars/dem.png",
+        "username": "Mary",
+        "text": "My name is Mary and I am 49 years old. I have a husband and 2 grown sons. Our sons attended international schools and I found work at those schools as well. Besides roaming around the world, I like playing games. Board games, cards, black jack or poker, mah jong, or silly games on Facebook, jig saws, basically anything.",
+        "likes": [38000, 92000, 147000],
+        "dislikes": [71000, 126000]
+      },
+      {
+        "avatar": "avatars/dem.png",
+        "username": "Lauren",
+        "text": "I'm Lauren, I love to hang out with friends and go shopping. Just doing some online studies here!",
+        "likes": [65000, 121000],
+        "dislikes": [44000, 139000]
+      },
+      {
+        "avatar": "avatars/dem.png",
+        "username": "Kim",
+        "text": "Just now I'm finishing up my first year of a difficult college classes. I also work at a cosmetics counter as a part-time thing and earn some money online in my free time. I have a lot planned for my future, and it's really exciting. I want to grow up and be a doctor with a family of lots of little dogs. It'll be fantastic.",
+        "likes": [24000, 69000, 108000, 155000],
+        "dislikes": [9999999]
+      },
+      {
+        "avatar": "avatars/dem.png",
+        "username": "Jane",
+        "text": "Dear all, my name is Jane and I have an important interview coming up soon. This is all I can think about these days. I hope you're doing well.",
+        "likes": [51000, 103000, 144000],
+        "dislikes": [99000]
+      },
+      {
+        "avatar": "avatars/dem.png",
+        "username": "Heather",
+        "text": "Hey, guys. I'm 19, Korean American. I consider myself pretty nice, though not a total angel. I just like being friendly to people I meet. In my spare time, I like making all kinds of friends, having conversations about whatever, looking at paintings, using makeup, reading, singing (show choir representtt!), making jewelry, and eating delicious food. Enjoy your day, stay out of trouble.",
+        "likes": [17000, 43000, 86000, 124000, 161000],
+        "dislikes": [9999999]
       },
       {
         "avatar": "avatars/dem.png",
         "username": "Arjen",
-        "text": "REPLACE ME. I teach high school and coach soccer. I grew up in a union family and that shaped a lot of how I see things. Outside of work I play guitar badly and garden slightly better.",
-        "likes": [25000, 85000, 130000, 160000], // 4
-        "dislikes": [9999999] // 0
+        "text": "My name's Arjen, I study Artificial Intelligence. Also I like to use my free time to make all kinds of different things... I'm kind of a nerd too, I guess.",
+        "likes": [34000, 79000, 137000],
+        "dislikes": [113000]
       }
     ]
   },
 
-  // ------------------------- REPUBLICAN GROUP -------------------------
+  // REPUBLICAN GROUP - identical bios, elephant badge
   "rep": {
     "posts": [
       {
         "avatar": "avatars/rep.png",
-        "username": "Georgeee",
-        "text": "REPLACE ME. I'm a 19 year old from Wisconsin. I volunteer with the College Republicans on campus, and outside of that I mostly listen to music, draw, and read way too much psychology.",
-        "likes": [45000, 50000, 110000, 150000], // 4
-        "dislikes": [55000] // 1
+        "username": "George",
+        "text": "I'm a 19 year old dude from Wisconsin (commence making fun of my accent). I love music. Besides music I like learning languages, psychology, drawing, and writing.",
+        "likes": [22000, 61000, 118000, 152000],
+        "dislikes": [9999999]
       },
+      // index 1 - COMPENSATING MEMBER, likes overwritten by the code
       {
-        // COMPENSATING member - keep at index 1 (see note above)
         "avatar": "avatars/rep.png",
         "username": "Sarah",
-        "text": "REPLACE ME. I'm Sarah, married with two grown kids. I spent my career helping young people with disabilities find work, and I've volunteered for Republican candidates in every election since I was in my twenties.",
-        "likes": [12000, 14000, 15000, 35000, 80000], // overwritten by code
-        "dislikes": [60000] // 1  (overwritten only if compensate_dislikes is on)
+        "text": "Let me introduce myself. I'm Sarah, married, and mother of two wonderful (grown up) children. My career has been a bit weird. Starting off as a graduate historian, I switched to an entirely different discipline: vocational rehabilitation counselor trying to help young people with disabilities to get a job. I've just retired and started spending more time on my hobbies, such as singing, reading, and playing volleyball.",
+        "likes": [12000, 14000, 15000, 35000],
+        "dislikes": [58000]
       },
       {
         "avatar": "avatars/rep.png",
-        "username": "John",
-        "text": "REPLACE ME. Hi all. I work in logistics, I have two dogs, and on weekends I'm usually hiking. Politically I'm a pretty standard conservative Republican, though I try not to make it my whole personality.",
-        "likes": [20000, 60000, 95000, 140000], // 4
-        "dislikes": [9999999] // 0
+        "username": "Dan",
+        "text": "Hi there, I'm 57 years old, married, with two kids. I've been a computer programmer for about 30 years, but don't worry: I don't have the dusty haircut, oversized buttoned shirt and nerdie big frame glasses. Looking forward to working with you all.",
+        "likes": [30000, 74000, 129000],
+        "dislikes": [82000]
       },
       {
         "avatar": "avatars/rep.png",
-        "username": "AncaD",
-        "text": "REPLACE ME. Grad student, coffee enthusiast, terrible at cooking. I got into local politics through a campaign internship and now I can't stop reading about city budgets. Nice to meet everyone.",
-        "likes": [30000, 70000, 120000], // 3
-        "dislikes": [75000, 125000] // 2
+        "username": "Anca",
+        "text": "I am a Computer Science student, interested in Natural Language processing. Also a lover of loose leaf tea and a Semantic Web enthusiast. I'm curious about what this task is about.",
+        "likes": [26000, 88000, 141000, 166000],
+        "dislikes": [9999999]
+      },
+      {
+        "avatar": "avatars/rep.png",
+        "username": "Niki",
+        "text": "My life revolves around rock climbing. I started climbing when I was 12 (turning 19 soon) and usually climb 4-5 hours a day. Climbing never bores me, because each time is different - the routes, the weather, my strength and endurance. It's great!",
+        "likes": [19000, 47000, 96000, 134000, 158000],
+        "dislikes": [9999999]
+      },
+      {
+        "avatar": "avatars/rep.png",
+        "username": "Mary",
+        "text": "My name is Mary and I am 49 years old. I have a husband and 2 grown sons. Our sons attended international schools and I found work at those schools as well. Besides roaming around the world, I like playing games. Board games, cards, black jack or poker, mah jong, or silly games on Facebook, jig saws, basically anything.",
+        "likes": [38000, 92000, 147000],
+        "dislikes": [71000, 126000]
+      },
+      {
+        "avatar": "avatars/rep.png",
+        "username": "Lauren",
+        "text": "I'm Lauren, I love to hang out with friends and go shopping. Just doing some online studies here!",
+        "likes": [65000, 121000],
+        "dislikes": [44000, 139000]
+      },
+      {
+        "avatar": "avatars/rep.png",
+        "username": "Kim",
+        "text": "Just now I'm finishing up my first year of a difficult college classes. I also work at a cosmetics counter as a part-time thing and earn some money online in my free time. I have a lot planned for my future, and it's really exciting. I want to grow up and be a doctor with a family of lots of little dogs. It'll be fantastic.",
+        "likes": [24000, 69000, 108000, 155000],
+        "dislikes": [9999999]
+      },
+      {
+        "avatar": "avatars/rep.png",
+        "username": "Jane",
+        "text": "Dear all, my name is Jane and I have an important interview coming up soon. This is all I can think about these days. I hope you're doing well.",
+        "likes": [51000, 103000, 144000],
+        "dislikes": [99000]
+      },
+      {
+        "avatar": "avatars/rep.png",
+        "username": "Heather",
+        "text": "Hey, guys. I'm 19, Korean American. I consider myself pretty nice, though not a total angel. I just like being friendly to people I meet. In my spare time, I like making all kinds of friends, having conversations about whatever, looking at paintings, using makeup, reading, singing (show choir representtt!), making jewelry, and eating delicious food. Enjoy your day, stay out of trouble.",
+        "likes": [17000, 43000, 86000, 124000, 161000],
+        "dislikes": [9999999]
       },
       {
         "avatar": "avatars/rep.png",
         "username": "Arjen",
-        "text": "REPLACE ME. I teach high school and coach soccer. I grew up in a small business family and that shaped a lot of how I see things. Outside of work I play guitar badly and garden slightly better.",
-        "likes": [25000, 85000, 130000, 160000], // 4
-        "dislikes": [9999999] // 0
+        "text": "My name's Arjen, I study Artificial Intelligence. Also I like to use my free time to make all kinds of different things... I'm kind of a nerd too, I guess.",
+        "likes": [34000, 79000, 137000],
+        "dislikes": [113000]
       }
     ]
   }

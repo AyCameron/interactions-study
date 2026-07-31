@@ -36,6 +36,17 @@ $(function() {
     settings.avatar_dem = 'dem.png';
     settings.avatar_rep = 'rep.png';
 
+    // Ask the participant to state their party inside the paradigm, on the
+    // avatar screen, exactly as in the study script. Their answer drives the
+    // avatar they are given and the in-group / out-group resolution. The
+    // party value passed from Qualtrics is still recorded separately so you
+    // can check the two agree.
+    settings.ask_party = true;
+
+    // Minimum characters for the self-introduction.
+    settings.min_chars = 240;
+    settings.max_chars = 400;
+
     // Because there is nothing to choose between, the avatar selection
     // screen is skipped by default and the participant is simply assigned
     // the avatar for their party.
@@ -108,8 +119,8 @@ $(function() {
 
     // Names that appear in the "X disliked your post" popups. Same rule as
     // likes_by: every name must be a username in profiles.js for that party.
-    settings.dislikes_by_dem = ['Sarah', 'Arjen', 'Georgeee', 'AncaD', 'John'];
-    settings.dislikes_by_rep = ['Sarah', 'Arjen', 'Georgeee', 'AncaD', 'John'];
+    settings.dislikes_by_dem = ['Lauren', 'Arjen', 'Jane', 'Kim', 'Dan'];
+    settings.dislikes_by_rep = ['Lauren', 'Arjen', 'Jane', 'Kim', 'Dan'];
 
     // Can a participant both like AND dislike the same post?
     // true = one reaction per post (clicking either disables both).
@@ -146,8 +157,8 @@ $(function() {
     // The list is used in order, so the FIRST name is the one who likes
     // the rejected participant's single post.
 
-    settings.likes_by_dem = ['John', 'AncaD', 'Sarah', 'Arjen', 'Georgeee', 'John'];
-    settings.likes_by_rep = ['John', 'AncaD', 'Sarah', 'Arjen', 'Georgeee', 'John'];
+    settings.likes_by_dem = ['Dan', 'Anca', 'Niki', 'Mary', 'George', 'Heather'];
+    settings.likes_by_rep = ['Dan', 'Anca', 'Niki', 'Mary', 'George', 'Heather'];
 
     // ---------------------------------------------------------------
     // 7. SHUFFLE THE ORDER OF THE GROUP MEMBERS?
@@ -200,41 +211,75 @@ $(function() {
     });
   }
 
-  // --- Slide: Avatar --------------------------------------------------
-  // There is one avatar per party. The participant is assigned the avatar
-  // for their own party, which is passed in from Qualtrics as &party=dem
-  // or &party=rep. Either it is assigned silently, or it is shown once for
-  // confirmation, depending on settings.skip_avatar_selection.
+  // --- Slide: Party + assigned avatar ----------------------------------
+  // The participant states their party, is told they have been assigned that
+  // party's badge, and sees it before continuing. Their answer here is what
+  // drives window.party from this point on; the value passed in from
+  // Qualtrics is kept separately as window.party_survey for cross-checking.
   function init_avatar() {
 
-    window.avatarfile = (window.party === 'rep')
-                      ? window.settings.avatar_rep
-                      : window.settings.avatar_dem;
-    window.avatarexport = window.avatarfile;
-
-    if (window.settings.skip_avatar_selection) {
+    if (!window.settings.ask_party) {
+      set_party(window.party);
       init_text();
       return;
     }
 
     $('#avatar').show();
-    $('.avatars').append(
-      '<img class="avatar selected" src="avatars/' + window.avatarfile +
-      '" alt="your avatar" />'
-    );
+
+    $('input[name="partysr"]').on('change', function() {
+      set_party($(this).val());
+      $('#party-word').text(window.party === 'rep' ? 'Republican' : 'Democratic');
+      $('.avatars').html('<img class="avatar selected" src="avatars/' +
+                         window.avatarfile + '" alt="your avatar" />');
+      $('#avatar-assigned').show();
+    });
 
     $('#submit_avatar').on('click', function() {
+      if (!window.party_selfreport) {
+        alertify.log('Please select an option', 'error');
+        return;
+      }
       $('#avatar').hide();
       init_text();
     });
+  }
+
+  // Sets the working party and everything that depends on it. Called either
+  // from the participant's own answer or from the Qualtrics parameter.
+  function set_party(party) {
+    window.party = (party === 'rep') ? 'rep' : 'dem';
+    window.party_selfreport = window.party;
+    window.avatarfile = (window.party === 'rep')
+                      ? window.settings.avatar_rep
+                      : window.settings.avatar_dem;
+    window.avatarexport = window.avatarfile;
+
+    // in-group / out-group is relative to the party just set
+    if (window.gp_request === 'in') {
+      window.groupparty = window.party;
+    } else if (window.gp_request === 'out') {
+      window.groupparty = (window.party === 'dem') ? 'rep' : 'dem';
+    } else if (window.gp_request === 'dem' || window.gp_request === 'rep') {
+      window.groupparty = window.gp_request;
+    } else {
+      window.groupparty = (window.party === 'dem') ? 'rep' : 'dem';
+    }
+    window.grouptype = (window.groupparty === window.party) ? 'ingroup' : 'outgroup';
+
+    load_profiles();
+    adjust_to_condition();
   }
 
   // --- Slide: Description ---------------------------------------------
   function init_text() {
     $('#text').show();
 
+    $("#count").text(window.settings.min_chars + " characters required");
     $("#description").keyup(function() {
-      $("#count").text("Characters left: " + (400 - $(this).val().length));
+      var n = $(this).val().length;
+      $("#count").text(n < window.settings.min_chars
+        ? (window.settings.min_chars - n) + " more characters required"
+        : n + " characters (" + window.settings.min_chars + " required)");
     });
 
     $('#submit_text').on('click', function() {
@@ -245,10 +290,10 @@ $(function() {
       if (val == "") {
         error = 1;
         errormsg = 'Please enter text';
-      } else if (val.length < 140) {
+      } else if (val.length < window.settings.min_chars) {
         error = 1;
-        errormsg = 'Please write a bit more';
-      } else if (val.length > 401) {
+        errormsg = 'Please write at least ' + window.settings.min_chars + ' characters';
+      } else if (val.length > window.settings.max_chars + 1) {
         error = 1;
         errormsg = 'Please enter less text';
       }
@@ -428,6 +473,7 @@ $(function() {
     setTimeout(function() {
 
       $(window).unbind('beforeunload');
+      $('#final-msg').show();
       $('#final-continue').show();
       $('#timer').text('00:00');
 
@@ -459,7 +505,11 @@ $(function() {
       oo: true,                     // tag so Qualtrics recognises our message
       participant:  window.participant,
       condition:    window.condition,
-      party:        window.party,
+      party:          window.party,            // used by the paradigm
+      partySelfReport: window.party_selfreport, // answered on the avatar screen
+      partySurvey:     window.party_survey,     // passed in from Qualtrics
+      partyMatch:      (window.party_survey && window.party_selfreport
+                        && window.party_survey === window.party_selfreport) ? 1 : 0,
       groupparty:   window.groupparty,
       grouptype:    window.grouptype,   // "ingroup" or "outgroup"
       username:     window.username,
@@ -515,34 +565,19 @@ $(function() {
       window.participant = "unknown";
     }
 
-    // party = the PARTICIPANT's party: dem or rep
-    window.party = (window.QueryString.party === 'rep') ? 'rep'
-                 : (window.QueryString.party === 'dem') ? 'dem'
-                 : 'dem';  // fallback so the page never breaks
+    // party from Qualtrics. Kept as party_survey for cross-checking; the
+    // participant's own answer on the avatar screen is what the paradigm
+    // actually runs on (see set_party).
+    window.party_survey = (window.QueryString.party === 'rep') ? 'rep'
+                        : (window.QueryString.party === 'dem') ? 'dem'
+                        : '';
+    window.party = window.party_survey || 'dem';
+    window.party_selfreport = '';
 
-    // gp = the GROUP's party. Accepts either form:
-    //
-    //   gp=in   / gp=out   - RECOMMENDED. Relative to the participant, so
-    //                        Qualtrics can randomise in-group vs out-group
-    //                        without knowing which party the person is.
-    //   gp=dem  / gp=rep   - absolute, if you would rather set it directly.
-    //
-    // If omitted, defaults to the out-party.
-    var gp = window.QueryString.gp;
-
-    if (gp === 'in') {
-      window.groupparty = window.party;
-    } else if (gp === 'out') {
-      window.groupparty = (window.party === 'dem') ? 'rep' : 'dem';
-    } else if (gp === 'dem' || gp === 'rep') {
-      window.groupparty = gp;
-    } else {
-      window.groupparty = (window.party === 'dem') ? 'rep' : 'dem';
-    }
-
-    // Derived for the data file, so the analysis does not have to
-    // reconstruct it from two party columns.
-    window.grouptype = (window.groupparty === window.party) ? 'ingroup' : 'outgroup';
+    // gp is resolved later, once the party is known.
+    //   in / out  - relative to the participant (recommended)
+    //   dem / rep - absolute
+    window.gp_request = window.QueryString.gp;
 
     // redirect (standalone mode only)
     if (window.QueryString.redirect !== undefined && window.QueryString.redirect !== "") {
@@ -689,8 +724,7 @@ $(function() {
   // --- Start -------------------------------------------------------------
   set_settings();
   get_params();
-  load_profiles();
-  adjust_to_condition();
+  set_party(window.party);   // provisional; re-run when the participant answers
   init_intro();
 
 });
