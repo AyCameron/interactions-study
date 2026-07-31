@@ -228,6 +228,7 @@ $(function() {
 
     $('input[name="partysr"]').on('change', function() {
       set_party($(this).val());
+      window.party_answered = true;
       $('#party-word').text(window.party === 'rep' ? 'Republican' : 'Democratic');
       $('.avatars').html('<img class="avatar selected" src="avatars/' +
                          window.avatarfile + '" alt="your avatar" />');
@@ -235,7 +236,9 @@ $(function() {
     });
 
     $('#submit_avatar').on('click', function() {
-      if (!window.party_selfreport) {
+      // party_selfreport is also set by the provisional startup call, so it
+      // can't be used to detect whether the participant actually answered.
+      if (!window.party_answered) {
         alertify.log('Please select an option', 'error');
         return;
       }
