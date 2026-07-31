@@ -17,11 +17,12 @@ analysis. Prefer being conservative over being clever.
 |---|---|
 | `index.html` | All screens and all participant-facing text; two Mustache templates at the bottom |
 | `main.js` | All logic. Editable parameters are in `set_settings()` at the top, in numbered sections |
-| `profiles.js` | The five fake group members, in a Democratic and a Republican version. Despite the original's `.json` name this is JavaScript |
+| `profiles.js` | The eleven fake group members, in a Democratic and a Republican version (identical bios, only the avatar differs). Despite the original's `.json` name this is JavaScript |
 | `style.css` | Appearance. Dislike-button styles are in a marked block at the bottom |
 | `shortcut.js` | Vendored keyboard library, untouched from the original |
-| `avatars/` | Exactly two images: `dem.png` (donkey on blue) and `rep.png` (elephant on red), 250x250 RGBA with transparent corners. One badge per party, used by the participant and all five group members alike |
+| `avatars/` | Exactly two images: `dem.png` (donkey on blue) and `rep.png` (elephant on red), 250x250 RGBA with transparent corners. One badge per party, used by the participant and the group members — 8 of the 11 show the majority party's badge, 3 show the minority's (invariant 3b) |
 | `SETUP.md` | Qualtrics integration, randomization, test checklist. Keep in sync with code changes |
+| `CHANGE_REQUEST.md` | A historical record of a prior change request (11-member roster, in-paradigm party self-report, etc.) that has already been applied. Not something to re-apply |
 
 ## Design invariants — do not change these without being asked
 
@@ -97,24 +98,40 @@ Participant IDs are **strings** (Qualtrics ResponseIDs look like
 
 ## How to test a change
 
-Serve locally and open all four cells:
-
-```bash
-python3 -m http.server 8000
-```
+Serve locally (e.g. `python3 -m http.server 8000`) and open all eight cells
+from SETUP.md §7:
 
 ```
-http://localhost:8000/index.html?c=1&party=dem&gp=rep&p=TEST_DR
-http://localhost:8000/index.html?c=2&party=dem&gp=rep&p=TEST_DI
-http://localhost:8000/index.html?c=1&party=rep&gp=dem&p=TEST_RR
-http://localhost:8000/index.html?c=2&party=rep&gp=dem&p=TEST_RI
+http://localhost:8000/index.html?c=1&party=dem&gp=out&p=TEST_D_REJ_OUT
+http://localhost:8000/index.html?c=2&party=dem&gp=out&p=TEST_D_INC_OUT
+http://localhost:8000/index.html?c=1&party=dem&gp=in&p=TEST_D_REJ_IN
+http://localhost:8000/index.html?c=2&party=dem&gp=in&p=TEST_D_INC_IN
+http://localhost:8000/index.html?c=1&party=rep&gp=out&p=TEST_R_REJ_OUT
+http://localhost:8000/index.html?c=2&party=rep&gp=out&p=TEST_R_INC_OUT
+http://localhost:8000/index.html?c=1&party=rep&gp=in&p=TEST_R_REJ_IN
+http://localhost:8000/index.html?c=2&party=rep&gp=in&p=TEST_R_INC_IN
 ```
 
-To avoid waiting three minutes per pass, temporarily lower
-`settings.tasklength` — and always set it back to `180000` before committing.
+Gotchas specific to this version:
 
-Check: no console errors, no broken images, reaction counts match the design
-table, Like and Dislike lock together, buttons fit inside the 240px post box.
+- The URL's `party` value only seeds a provisional value. `settings.ask_party`
+  is `true`, so you must actually click the matching Democrat/Republican radio
+  on the avatar screen for the cell to reflect what the URL implies. Submit is
+  correctly blocked ("Please select an option") until you do.
+- The introduction box needs at least `settings.min_chars` (240) characters or
+  the description screen will reject it.
+- Lowering `settings.tasklength` for faster testing only makes the "final
+  continue" button appear sooner — it does **not** speed up reaction delivery.
+  `condition_1_dislikes`/`condition_2_likes` fire on their own fixed real-time
+  schedule (up to ~150s) regardless of `tasklength`, so you still need to wait
+  for those to see the final reaction counts. Always set `tasklength` back to
+  `180000` before committing either way.
+
+Check: no console errors, no broken images, the party self-report screen
+actually gates progress, reaction counts match the design table (5 of 6
+majority-authored, 1 minority-authored — invariant 3b), the closing message
+appears with the timer at `00:00`, Like and Dislike lock together, buttons fit
+inside the 240px post box.
 
 ## Working style for this repo
 
