@@ -398,8 +398,11 @@ If the iframe fights you, split into Survey 1 → paradigm → Survey 2. Link
 Survey 1's end-of-survey redirect to:
 
 ```
-https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&p=${e://Field/ResponseID}&redirect=<URL-encoded Survey 2 link>
+https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&gp=${e://Field/gp}&p=${e://Field/ResponseID}&redirect=<URL-encoded Survey 2 link>
 ```
+
+Do not drop `gp` from this URL - without it the paradigm falls back to its
+default (out-group), silently breaking the in-group cells of your design.
 
 In Survey 2, declare `p`, `c`, `party`, `gp`, `gt`, `av`, `u`, `lg`, `lw`, `dg`,
 `dw` as embedded fields at the top of the flow — Qualtrics captures matching URL parameters
