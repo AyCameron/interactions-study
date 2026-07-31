@@ -20,13 +20,21 @@ analysis. Prefer being conservative over being clever.
 | `profiles.js` | The five fake group members, in a Democratic and a Republican version. Despite the original's `.json` name this is JavaScript |
 | `style.css` | Appearance. Dislike-button styles are in a marked block at the bottom |
 | `shortcut.js` | Vendored keyboard library, untouched from the original |
-| `avatars/` | Participant-selectable avatars; `avatars/others/` holds group-member avatars |
+| `avatars/` | Exactly two images: `dem.png` (donkey on blue) and `rep.png` (elephant on red), 250x250 RGBA with transparent corners. One badge per party, used by the participant and all five group members alike |
 | `SETUP.md` | Qualtrics integration, randomization, test checklist. Keep in sync with code changes |
 
 ## Design invariants — do not change these without being asked
 
 1. **Condition 1 = rejected, condition 2 = included.** No third condition
    exists. An out-of-range `c` parameter falls back to 1 rather than erroring.
+
+1b. **The design is 2 (condition) x 2 (in-group / out-group), nested within
+   participant party — eight cells.** `gp` accepts `in`/`out` (relative to the
+   participant, which is what Qualtrics sends) or `dem`/`rep` (absolute).
+   `window.grouptype` is derived from it and must keep being exported, because
+   the analysis keys on it. Reactions must always come from the party named by
+   `gp`: `likes_by_*` and `dislikes_by_*` are selected by `groupparty`, never by
+   the participant's own party. Do not change that wiring.
 
 2. **Total reactions to the participant's post are held constant at 6.**
    Rejected = 1 like + 5 dislikes. Included = 6 likes + 0 dislikes. Only the
@@ -45,6 +53,12 @@ analysis. Prefer being conservative over being clever.
 5. **The Democratic and Republican profile sets must stay matched** on bio
    length, topics, warmth, and apparent age/gender mix. The only intended
    difference is the partisan cue.
+
+5b. **There is one avatar per party, shared by everyone on screen.** It is a
+   party badge, not a profile picture. `dem.png` and `rep.png` must be matched
+   on style, complexity, colour saturation and visual appeal - if one is more
+   attractive or better drawn than the other, party is confounded with
+   likeability. Do not reintroduce per-person avatars without being asked.
 
 6. **Every name in `likes_by_*` and `dislikes_by_*` must be a `username` present
    in the corresponding profile set.** A reaction from someone not on screen
