@@ -178,7 +178,7 @@ $(function() {
     // 8. MAJORITY / MINORITY GROUP COMPOSITION (interaction source)
     // ---------------------------------------------------------------
     // The 11 group members are a mix of the majority party (whichever
-    // party gp resolves to - the "interaction source" manipulation) and a
+    // party rejector resolves to - the "interaction source" manipulation) and a
     // minority presence from the other party. Which specific people play
     // which role is fixed here, independent of which party ends up being
     // majority for a given participant - only their avatar (and the
@@ -288,16 +288,16 @@ $(function() {
     window.avatarexport = window.avatarfile;
 
     // in-group / out-group is relative to the party just set
-    if (window.gp_request === 'in') {
-      window.groupparty = window.party;
-    } else if (window.gp_request === 'out') {
-      window.groupparty = (window.party === 'dem') ? 'rep' : 'dem';
-    } else if (window.gp_request === 'dem' || window.gp_request === 'rep') {
-      window.groupparty = window.gp_request;
+    if (window.rejector_request === 'in') {
+      window.rejectorParty = window.party;
+    } else if (window.rejector_request === 'out') {
+      window.rejectorParty = (window.party === 'dem') ? 'rep' : 'dem';
+    } else if (window.rejector_request === 'dem' || window.rejector_request === 'rep') {
+      window.rejectorParty = window.rejector_request;
     } else {
-      window.groupparty = (window.party === 'dem') ? 'rep' : 'dem';
+      window.rejectorParty = (window.party === 'dem') ? 'rep' : 'dem';
     }
-    window.grouptype = (window.groupparty === window.party) ? 'ingroup' : 'outgroup';
+    window.rejectorType = (window.rejectorParty === window.party) ? 'ingroup' : 'outgroup';
 
     load_profiles();
     adjust_to_condition();
@@ -561,8 +561,8 @@ $(function() {
       partySurvey:     window.party_survey,     // passed in from Qualtrics
       partyMatch:      (window.party_survey && window.party_selfreport
                         && window.party_survey === window.party_selfreport) ? 1 : 0,
-      groupparty:   window.groupparty,
-      grouptype:    window.grouptype,   // "ingroup" or "outgroup"
+      rejectorParty: window.rejectorParty,
+      rejectorType:  window.rejectorType,   // "ingroup" or "outgroup"
       username:     window.username,
       avatar:       window.avatarexport,
       description:  window.description,
@@ -596,8 +596,8 @@ $(function() {
         + '&p='     + encodeURIComponent(window.participant)
         + '&c='     + window.condition
         + '&party=' + window.party
-        + '&gp='    + window.groupparty
-        + '&gt='    + window.grouptype
+        + '&rejector=' + window.rejectorParty
+        + '&rejectorType=' + window.rejectorType
         + '&av='    + encodeURIComponent(window.avatarexport)
         + '&u='     + encodeURIComponent(window.username)
         + '&lg='    + payload.likesGiven
@@ -633,10 +633,10 @@ $(function() {
     window.party = window.party_survey || 'dem';
     window.party_selfreport = '';
 
-    // gp is resolved later, once the party is known.
+    // rejector is resolved later, once the party is known.
     //   in / out  - relative to the participant (recommended)
     //   dem / rep - absolute
-    window.gp_request = window.QueryString.gp;
+    window.rejector_request = window.QueryString.rejector;
 
     // redirect (standalone mode only)
     if (window.QueryString.redirect !== undefined && window.QueryString.redirect !== "") {
@@ -650,8 +650,8 @@ $(function() {
   }
 
   // --- Build the mixed majority/minority group -----------------------------
-  // window.groupparty is the MAJORITY party (the interaction-source
-  // manipulation, driven by gp=in/out/dem/rep). Most of the 11 group
+  // window.rejectorParty is the MAJORITY party (the interaction-source
+  // manipulation, driven by rejector=in/out/dem/rep). Most of the 11 group
   // members are that party; settings.minority_role_names names the few who
   // are the other party instead - see set_settings() §8. Every username
   // exists in both party lists in profiles.js with identical bios, so this
@@ -662,7 +662,7 @@ $(function() {
       return;
     }
 
-    var majorityParty = window.groupparty;
+    var majorityParty = window.rejectorParty;
     var minorityParty = (majorityParty === 'dem') ? 'rep' : 'dem';
 
     // profiles.dem and profiles.rep list the same 11 usernames in the same

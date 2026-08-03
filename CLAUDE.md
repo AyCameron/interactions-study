@@ -30,10 +30,10 @@ analysis. Prefer being conservative over being clever.
    exists. An out-of-range `c` parameter falls back to 1 rather than erroring.
 
 1b. **The design is 2 (condition) x 2 (in-group / out-group), nested within
-   participant party — eight cells.** `gp` accepts `in`/`out` (relative to the
+   participant party — eight cells.** `rejector` accepts `in`/`out` (relative to the
    participant, which is what Qualtrics sends) or `dem`/`rep` (absolute).
-   `window.grouptype` is derived from it and must keep being exported, because
-   the analysis keys on it. `window.groupparty` is the **majority** party for
+   `window.rejectorType` is derived from it and must keep being exported, because
+   the analysis keys on it. `window.rejectorParty` is the **majority** party for
    the cell (see 3b) — most reactions come from it, but not all.
 
 2. **Total reactions to the participant's post are held constant at 6.**
@@ -104,14 +104,14 @@ Serve locally (e.g. `python3 -m http.server 8000`) and open all eight cells
 from SETUP.md §7:
 
 ```
-http://localhost:8000/index.html?c=1&party=dem&gp=out&p=TEST_D_REJ_OUT
-http://localhost:8000/index.html?c=2&party=dem&gp=out&p=TEST_D_INC_OUT
-http://localhost:8000/index.html?c=1&party=dem&gp=in&p=TEST_D_REJ_IN
-http://localhost:8000/index.html?c=2&party=dem&gp=in&p=TEST_D_INC_IN
-http://localhost:8000/index.html?c=1&party=rep&gp=out&p=TEST_R_REJ_OUT
-http://localhost:8000/index.html?c=2&party=rep&gp=out&p=TEST_R_INC_OUT
-http://localhost:8000/index.html?c=1&party=rep&gp=in&p=TEST_R_REJ_IN
-http://localhost:8000/index.html?c=2&party=rep&gp=in&p=TEST_R_INC_IN
+http://localhost:8000/index.html?c=1&party=dem&rejector=out&p=TEST_D_REJ_OUT
+http://localhost:8000/index.html?c=2&party=dem&rejector=out&p=TEST_D_INC_OUT
+http://localhost:8000/index.html?c=1&party=dem&rejector=in&p=TEST_D_REJ_IN
+http://localhost:8000/index.html?c=2&party=dem&rejector=in&p=TEST_D_INC_IN
+http://localhost:8000/index.html?c=1&party=rep&rejector=out&p=TEST_R_REJ_OUT
+http://localhost:8000/index.html?c=2&party=rep&rejector=out&p=TEST_R_INC_OUT
+http://localhost:8000/index.html?c=1&party=rep&rejector=in&p=TEST_R_REJ_IN
+http://localhost:8000/index.html?c=2&party=rep&rejector=in&p=TEST_R_INC_IN
 ```
 
 Gotchas specific to this version:

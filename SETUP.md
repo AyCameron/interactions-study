@@ -21,7 +21,7 @@ ignored. See §2b for what that changes about your design and your claims.
 | Records dislikes given as well as likes given | `main.js` `init_task()` |
 | One reaction per post (like *or* dislike), switchable | `main.js` §4b |
 | Participant's avatar pool depends on their party (`&party=dem` / `&party=rep`) | `main.js` §1 |
-| Group members' party set by `&gp=dem` / `&gp=rep`; defaults to out-party | `main.js`, `profiles.js` |
+| Group members' party set by `&rejector=dem` / `&rejector=rep`; defaults to out-party | `main.js`, `profiles.js` |
 | Participant ID now accepts **text**, so Qualtrics ResponseIDs work | `main.js` `get_params()` |
 | Records how many likes the participant gave, to whom, and when | `main.js` `init_task()` |
 | Returns data to Qualtrics via iframe `postMessage`, with URL redirect fallback | `main.js` `finish()` |
@@ -70,12 +70,12 @@ corrupt data rather than producing a visible error.
 **Whose party is the group?** The code supports three designs; you have to pick
 one and it changes your cell structure:
 
-- **Out-party group** (Democrat participant faces Republicans). Set `gp` to the
-  opposite of `party`, or just leave `gp` out and let the default handle it.
-  Design: 2 (condition) × 2 (participant party) = 4 cells.
-- **In-party group.** Set `gp` equal to `party`. Same 4 cells.
-- **Group party manipulated.** Randomize `gp` too. 8 cells, and you need roughly
-  twice the sample.
+- **Out-party group** (Democrat participant faces Republicans). Set `rejector` to
+  the opposite of `party`, or just leave `rejector` out and let the default
+  handle it. Design: 2 (condition) × 2 (participant party) = 4 cells.
+- **In-party group.** Set `rejector` equal to `party`. Same 4 cells.
+- **Group party manipulated.** Randomize `rejector` too. 8 cells, and you need
+  roughly twice the sample.
 
 **This build is set up for the third option**, crossing condition with in-group
 vs out-group. That is what lets you separate "rejection hurts" from "rejection by
@@ -273,10 +273,10 @@ Assuming your earlier questions produce an embedded field `party` with values
 `dem` / `rep`, build this in **Survey Flow**:
 
 ```
-Embedded Data: party = (blank)      <- set by your earlier questions
-Embedded Data: cond  = (blank)
-Embedded Data: gp    = (blank)
-Embedded Data: OO_condition, OO_party, OO_groupparty, OO_grouptype,
+Embedded Data: party    = (blank)      <- set by your earlier questions
+Embedded Data: cond     = (blank)
+Embedded Data: rejector = (blank)
+Embedded Data: OO_condition, OO_party, OO_rejectorparty, OO_rejectortype,
                OO_username, OO_avatar, OO_bio, OO_likesgiven, OO_likedwho,
                OO_likedwhen, OO_dislikesgiven, OO_dislikedwho,
                OO_dislikedwhen, OO_finished   <- all blank
@@ -285,27 +285,27 @@ Embedded Data: OO_condition, OO_party, OO_groupparty, OO_grouptype,
 
 Branch If: party = dem
    └─ Randomizer  [Evenly Present Elements - present 1 of 4]
-        ├─ Group A: cond = 1  AND  gp = in     (rejected by in-group)
-        ├─ Group B: cond = 2  AND  gp = in     (included by in-group)
-        ├─ Group C: cond = 1  AND  gp = out    (rejected by out-group)
-        └─ Group D: cond = 2  AND  gp = out    (included by out-group)
+        ├─ Group A: cond = 1  AND  rejector = in     (rejected by in-group)
+        ├─ Group B: cond = 2  AND  rejector = in     (included by in-group)
+        ├─ Group C: cond = 1  AND  rejector = out    (rejected by out-group)
+        └─ Group D: cond = 2  AND  rejector = out    (included by out-group)
 
 Branch If: party = rep
    └─ Randomizer  [Evenly Present Elements - present 1 of 4]
-        ├─ Group A: cond = 1  AND  gp = in
-        ├─ Group B: cond = 2  AND  gp = in
-        ├─ Group C: cond = 1  AND  gp = out
-        └─ Group D: cond = 2  AND  gp = out
+        ├─ Group A: cond = 1  AND  rejector = in
+        ├─ Group B: cond = 2  AND  rejector = in
+        ├─ Group C: cond = 1  AND  rejector = out
+        └─ Group D: cond = 2  AND  rejector = out
 
   [ the paradigm page ]
   [ needs-threat scale, then everything else ]
 ```
 
 Each of the four elements inside a randomizer is a **Group** containing two
-Embedded Data blocks, one setting `cond` and one setting `gp`. Setting both
-inside a single element is what guarantees the four cells are balanced.
+Embedded Data blocks, one setting `cond` and one setting `rejector`. Setting
+both inside a single element is what guarantees the four cells are balanced.
 
-Do not use two nested randomizers (one for `cond`, one for `gp`). Two
+Do not use two nested randomizers (one for `cond`, one for `rejector`). Two
 independent evenly-present randomizers balance each factor's margins but do not
 guarantee balanced cells, and cell balance is what you need for a 2x2.
 
@@ -313,17 +313,18 @@ Two separate branches is the stratification by party: each randomizer balances
 only within its own branch, so Democrats and Republicans are each split evenly
 across the four cells.
 
-**Note the `gp = in` / `gp = out` values.** They are relative to the
-participant, so Qualtrics never needs to know which party the person is when
-assigning - the paradigm resolves `in` and `out` into an actual party itself.
-You can still pass `gp = dem` or `gp = rep` if you would rather set it absolutely.
+**Note the `rejector = in` / `rejector = out` values.** They are relative to
+the participant, so Qualtrics never needs to know which party the person is
+when assigning - the paradigm resolves `in` and `out` into an actual party
+itself. You can still pass `rejector = dem` or `rejector = rep` if you would
+rather set it absolutely.
 
 Practical notes:
 
 - "Evenly Present Elements" balances **assignments**, not completions. Rejected
   participants drop out more. Over-recruit by roughly 15%.
-- Eight cells is a lot. Powering the condition x group-type interaction, which is
-  the comparison this design exists to make, needs substantially more than
+- Eight cells is a lot. Powering the condition x rejectorType interaction, which
+  is the comparison this design exists to make, needs substantially more than
   powering the main effect of condition. Run the power analysis on the
   interaction before you set a recruitment target.
 - The counter accumulates across previews and test responses. Do all testing on a
@@ -332,7 +333,7 @@ Practical notes:
   them appear in your export even for people who quit partway.
 - You need an explicit rule for independents and "prefer not to say", applied
   *before* the randomizer. Otherwise they reach the paradigm with no `cond` or
-  `gp` value and everyone silently defaults to rejected-by-out-group.
+  `rejector` value and everyone silently defaults to rejected-by-out-group.
 
 ---
 
@@ -346,7 +347,7 @@ and paste:
 
 ```html
 <iframe id="ooframe"
-  src="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&gp=${e://Field/gp}&p=${e://Field/ResponseID}"
+  src="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&rejector=${e://Field/rejector}&p=${e://Field/ResponseID}"
   width="100%" height="900" style="border:0;"
   scrolling="yes"></iframe>
 ```
@@ -365,8 +366,8 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
         Qualtrics.SurveyEngine.setEmbeddedData('OO_condition',  e.data.condition);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_party',      e.data.party);
-        Qualtrics.SurveyEngine.setEmbeddedData('OO_groupparty', e.data.groupparty);
-        Qualtrics.SurveyEngine.setEmbeddedData('OO_grouptype',  e.data.grouptype);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_rejectorparty', e.data.rejectorParty);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_rejectortype',  e.data.rejectorType);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_username',   e.data.username);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_avatar',     e.data.avatar);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_bio',        e.data.description);
@@ -398,14 +399,15 @@ If the iframe fights you, split into Survey 1 → paradigm → Survey 2. Link
 Survey 1's end-of-survey redirect to:
 
 ```
-https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&gp=${e://Field/gp}&p=${e://Field/ResponseID}&redirect=<URL-encoded Survey 2 link>
+https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&rejector=${e://Field/rejector}&p=${e://Field/ResponseID}&redirect=<URL-encoded Survey 2 link>
 ```
 
-Do not drop `gp` from this URL - without it the paradigm falls back to its
-default (out-group), silently breaking the in-group cells of your design.
+Do not drop `rejector` from this URL - without it the paradigm falls back to
+its default (out-group), silently breaking the in-group cells of your design.
 
-In Survey 2, declare `p`, `c`, `party`, `gp`, `gt`, `av`, `u`, `lg`, `lw`, `dg`,
-`dw` as embedded fields at the top of the flow — Qualtrics captures matching URL parameters
+In Survey 2, declare `p`, `c`, `party`, `rejector`, `rejectorType`, `av`, `u`,
+`lg`, `lw`, `dg`, `dw` as embedded fields at the top of the flow — Qualtrics
+captures matching URL parameters
 automatically. Merge the two exports on `p` afterward. The free-text bio is
 deliberately not sent this way; long text plus URL encoding can exceed browser
 URL limits and truncate silently.
@@ -423,7 +425,7 @@ pasting a raw `<a>` tag into the normal rich-text editor just shows the
 literal tag text on screen instead of a working link.
 
 ```html
-<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&gp=${e://Field/gp}&p=${e://Field/ResponseID}" target="_blank">Click here to begin the social network task</a>
+<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&rejector=${e://Field/rejector}&p=${e://Field/ResponseID}" target="_blank">Click here to begin the social network task</a>
 ```
 
 Do not add `rel="noopener"` or `rel="noreferrer"` to this link - either one
@@ -471,8 +473,8 @@ Qualtrics.SurveyEngine.addOnload(function () {
 
         Qualtrics.SurveyEngine.setEmbeddedData('OO_condition',  e.data.condition);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_party',      e.data.party);
-        Qualtrics.SurveyEngine.setEmbeddedData('OO_groupparty', e.data.groupparty);
-        Qualtrics.SurveyEngine.setEmbeddedData('OO_grouptype',  e.data.grouptype);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_rejectorparty', e.data.rejectorParty);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_rejectortype',  e.data.rejectorType);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_username',   e.data.username);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_avatar',     e.data.avatar);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_bio',        e.data.description);
@@ -511,17 +513,17 @@ collection.
 ## 7. Test before you launch
 
 Open each of these eight links directly and click all the way through. The
-`gp=in` / `gp=out` form is what Qualtrics will actually send.
+`rejector=in` / `rejector=out` form is what Qualtrics will actually send.
 
 ```
-?c=1&party=dem&gp=out&p=TEST_D_REJ_OUT     rejected by Republicans
-?c=2&party=dem&gp=out&p=TEST_D_INC_OUT     included by Republicans
-?c=1&party=dem&gp=in&p=TEST_D_REJ_IN       rejected by fellow Democrats
-?c=2&party=dem&gp=in&p=TEST_D_INC_IN       included by fellow Democrats
-?c=1&party=rep&gp=out&p=TEST_R_REJ_OUT     rejected by Democrats
-?c=2&party=rep&gp=out&p=TEST_R_INC_OUT     included by Democrats
-?c=1&party=rep&gp=in&p=TEST_R_REJ_IN       rejected by fellow Republicans
-?c=2&party=rep&gp=in&p=TEST_R_INC_IN       included by fellow Republicans
+?c=1&party=dem&rejector=out&p=TEST_D_REJ_OUT     rejected by Republicans
+?c=2&party=dem&rejector=out&p=TEST_D_INC_OUT     included by Republicans
+?c=1&party=dem&rejector=in&p=TEST_D_REJ_IN       rejected by fellow Democrats
+?c=2&party=dem&rejector=in&p=TEST_D_INC_IN       included by fellow Democrats
+?c=1&party=rep&rejector=out&p=TEST_R_REJ_OUT     rejected by Democrats
+?c=2&party=rep&rejector=out&p=TEST_R_INC_OUT     included by Democrats
+?c=1&party=rep&rejector=in&p=TEST_R_REJ_IN       rejected by fellow Republicans
+?c=2&party=rep&rejector=in&p=TEST_R_INC_IN       included by fellow Republicans
 ```
 
 (Prefix each with `https://YOURNAME.github.io/group-intro-task/index.html`.)
@@ -533,8 +535,8 @@ For each one, confirm:
 - [ ] Of the 11 group members, 8 show the majority party's avatar and 3 show
       the minority party's (`settings.minority_role_names` in `main.js`) - not
       all 11 the same
-- [ ] In `gp=in` cells the participant's avatar matches the 8 majority members;
-      in `gp=out` cells it matches the 3 minority members instead
+- [ ] In `rejector=in` cells the participant's avatar matches the 8 majority
+      members; in `rejector=out` cells it matches the 3 minority members instead
 - [ ] Every reaction popup names someone from the correct party for their role
       (majority or minority) - 5 of the 6 reactions are majority-authored, 1 is
       minority-authored (Kim), in every cell
