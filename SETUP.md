@@ -410,6 +410,79 @@ automatically. Merge the two exports on `p` afterward. The free-text bio is
 deliberately not sent this way; long text plus URL encoding can exceed browser
 URL limits and truncate silently.
 
+### Alternative: new tab (single survey, no merge)
+
+Keeps everything in one survey and one response row, without the two-survey
+`p`-merge - the original Qualtrics tab stays open the whole time, and the
+paradigm opens in a second tab that hands data back via `postMessage` the
+same way the iframe method does.
+
+**Step 1.** Add a Text/Graphic question on its own page. In the normal
+(non-HTML) text editor, add a link:
+
+```html
+<a href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&gp=${e://Field/gp}&p=${e://Field/ResponseID}" target="_blank">Click here to begin the social network task</a>
+```
+
+Do not add `rel="noopener"` or `rel="noreferrer"` to this link - either one
+removes `window.opener` in the new tab, which is what carries the data back.
+If your organization's Qualtrics theme or a browser extension adds one of
+these automatically, this method will silently stop delivering data.
+
+**Step 2.** Same question, **JavaScript** editor. This is the iframe
+snippet with one deliberate difference: it does **not** call
+`hideNextButton()`. Unlike an iframe, delivery here depends on
+`window.opener` surviving a real tab-to-tab round trip, which is usually
+reliable but not guaranteed - if you hide Next and the message never
+arrives, the participant is stuck with no way to continue. Leaving Next
+visible means a participant can always advance manually if the automatic
+path fails, even though `OO_*` fields would end up blank for that response.
+
+```javascript
+Qualtrics.SurveyEngine.addOnload(function () {
+    var qthis = this;
+
+    window.addEventListener('message', function (e) {
+        if (e.origin !== 'https://YOURNAME.github.io') { return; }
+        if (!e.data || e.data.oo !== true) { return; }
+
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_condition',  e.data.condition);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_party',      e.data.party);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_groupparty', e.data.groupparty);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_grouptype',  e.data.grouptype);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_username',   e.data.username);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_avatar',     e.data.avatar);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_bio',        e.data.description);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_likesgiven', e.data.likesGiven);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_likedwho',   e.data.likedWho);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_likedwhen',  e.data.likedWhen);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_dislikesgiven', e.data.dislikesGiven);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_dislikedwho',   e.data.dislikedWho);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_dislikedwhen',  e.data.dislikedWhen);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_finished',   e.data.finishedAt);
+
+        qthis.clickNextButton();
+    });
+});
+```
+
+**Step 3.** `settings.parentOrigin` in `main.js` is unchanged - it's used the
+same way whether the message comes from an iframe's parent or a tab's
+opener.
+
+**Step 4.** The paradigm shows its own "you can close this tab" message once
+the task finishes (participant-facing text in `index.html`, `#final-msg-newtab`)
+- you don't need to add return instructions in the Qualtrics question text
+itself, though telling participants up front what to expect ("this will open
+in a new tab; when you're done there, close it and come back here") is worth
+adding to this question's own text before the link.
+
+**Trade-off vs. the two-survey fallback:** one response row instead of a
+merge-on-`p` step, but data delivery depends on `window.opener` surviving
+the round trip rather than a URL parameter, which is a slightly less robust
+mechanism. Test this thoroughly (§7) before trusting it for real data
+collection.
+
 ---
 
 ## 7. Test before you launch

@@ -87,10 +87,12 @@ analysis. Prefer being conservative over being clever.
 
 ## Data contract with Qualtrics
 
-`finish()` in `main.js` sends a `postMessage` payload to the parent Qualtrics
-page. The listener in Qualtrics reads specific key names. If you add, rename, or
-remove a payload key, you must also update the JavaScript snippet in `SETUP.md`
-and tell me which embedded fields I need to add in the Qualtrics Survey Flow.
+`finish()` in `main.js` sends the same `postMessage` payload to whichever
+Qualtrics page is listening — the parent page if embedded in an iframe, or
+the tab that opened this one if using the "new tab" method (SETUP.md §6).
+Both listeners read the same key names. If you add, rename, or remove a
+payload key, you must update **both** JavaScript snippets in `SETUP.md` and
+tell me which embedded fields I need to add in the Qualtrics Survey Flow.
 Silent mismatches here mean lost data.
 
 Participant IDs are **strings** (Qualtrics ResponseIDs look like

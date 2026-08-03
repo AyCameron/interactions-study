@@ -68,9 +68,12 @@ $(function() {
 
     settings.defaultredirect = 'https://YOURUNIVERSITY.qualtrics.com/jfe/form/SV_XXXXXXXX';
 
-    // Security: the parent page we are allowed to send data to.
-    // Set this to YOUR Qualtrics domain, exactly as it appears in the
-    // address bar (no trailing slash). Leave as '*' only while testing.
+    // Security: the page we are allowed to send data to - either the
+    // Qualtrics page that has this paradigm in an iframe, or the Qualtrics
+    // tab that opened this one via a target="_blank" link (the "new tab"
+    // method - see SETUP.md). Set this to YOUR Qualtrics domain, exactly as
+    // it appears in the address bar (no trailing slash). Leave as '*' only
+    // while testing.
     settings.parentOrigin = 'https://ncsu.yul1.qualtrics.com';
 
     // ---------------------------------------------------------------
@@ -508,12 +511,25 @@ $(function() {
       $('#countdown').data('countdown-stopped', true);
 
       $(window).unbind('beforeunload');
-      $('#final-msg').show();
+
+      // Opened via a target="_blank" link from Qualtrics (the "new tab"
+      // method): this tab won't navigate away on its own, so it needs its
+      // own instructions rather than the iframe/standalone message.
+      if (window.parent === window && window.opener) {
+        $('#final-msg-newtab').show();
+      } else {
+        $('#final-msg').show();
+      }
+
       $('#final-continue').show();
       $('#timer').text('00:00');
 
       $('#final-continue').on('click', function() {
         finish();
+        // Prevent a second click from sending a duplicate postMessage -
+        // most relevant to the new-tab method, where this tab stays open
+        // and clickable after finishing.
+        $('#final-continue').hide();
       });
 
     }, window.settings.tasklength);
@@ -563,6 +579,14 @@ $(function() {
       // Running inside a Qualtrics iframe: hand the data to the parent
       // page, which writes it into embedded data and clicks Next.
       window.parent.postMessage(payload, window.settings.parentOrigin);
+    } else if (window.opener) {
+      // Opened in a new tab from a target="_blank" link in Qualtrics (the
+      // "new tab" method): hand the data back to the tab that opened this
+      // one, the same way the iframe method does. That tab's listener sets
+      // the embedded data and advances; this tab has nothing left to do -
+      // the on-screen message (see the end-of-task handler) already told
+      // the participant to close it.
+      window.opener.postMessage(payload, window.settings.parentOrigin);
     } else {
       // Running standalone: redirect to the follow-up survey, appending
       // the data as URL parameters. The long free-text description is
