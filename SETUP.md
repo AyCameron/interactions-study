@@ -417,11 +417,13 @@ Keeps everything in one survey and one response row, without the two-survey
 paradigm opens in a second tab that hands data back via `postMessage` the
 same way the iframe method does.
 
-**Step 1.** Add a Text/Graphic question on its own page. In the normal
-(non-HTML) text editor, add a link:
+**Step 1.** Add a Text/Graphic question on its own page. This must be
+entered via the **HTML view** (the `</>` / Source Code toolbar button) -
+pasting a raw `<a>` tag into the normal rich-text editor just shows the
+literal tag text on screen instead of a working link.
 
 ```html
-<a href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&gp=${e://Field/gp}&p=${e://Field/ResponseID}" target="_blank">Click here to begin the social network task</a>
+<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&gp=${e://Field/gp}&p=${e://Field/ResponseID}" target="_blank">Click here to begin the social network task</a>
 ```
 
 Do not add `rel="noopener"` or `rel="noreferrer"` to this link - either one
@@ -429,22 +431,43 @@ removes `window.opener` in the new tab, which is what carries the data back.
 If your organization's Qualtrics theme or a browser extension adds one of
 these automatically, this method will silently stop delivering data.
 
-**Step 2.** Same question, **JavaScript** editor. This is the iframe
-snippet with one deliberate difference: it does **not** call
-`hideNextButton()`. Unlike an iframe, delivery here depends on
-`window.opener` surviving a real tab-to-tab round trip, which is usually
-reliable but not guaranteed - if you hide Next and the message never
-arrives, the participant is stuck with no way to continue. Leaving Next
-visible means a participant can always advance manually if the automatic
-path fails, even though `OO_*` fields would end up blank for that response.
+**Step 2.** Same question, **JavaScript** editor. Next stays hidden until
+the participant actually clicks the link, at which point a fallback timer
+starts. If the paradigm's data arrives before the timer runs out, Next is
+clicked automatically and the timer is cancelled. If it doesn't - because
+`window.opener` failed to survive the round trip, or the participant closed
+the tab without finishing - Next reappears so nobody gets stranded, though
+`OO_*` fields will be blank for that response. Without this, Next would
+either be visible from the start (letting participants skip the task
+entirely by clicking it immediately) or hidden forever if delivery ever
+fails.
+
+`600000` (10 minutes) is a starting point for the fallback delay - it needs
+to comfortably exceed how long your intro screens plus the 3-minute task
+actually take end to end. Time your own piloting and adjust.
 
 ```javascript
 Qualtrics.SurveyEngine.addOnload(function () {
     var qthis = this;
+    var fallbackTimer = null;
+    var received = false;
+
+    qthis.hideNextButton();
+
+    // Start the fallback only once the participant actually clicks through,
+    // not from page load - they may sit on this page a while first.
+    $(qthis.questionContainer).find('#oolink').on('click', function () {
+        fallbackTimer = setTimeout(function () {
+            if (!received) { qthis.showNextButton(); }
+        }, 600000); // adjust based on your piloting - see note above
+    });
 
     window.addEventListener('message', function (e) {
         if (e.origin !== 'https://YOURNAME.github.io') { return; }
         if (!e.data || e.data.oo !== true) { return; }
+
+        received = true;
+        if (fallbackTimer) { clearTimeout(fallbackTimer); }
 
         Qualtrics.SurveyEngine.setEmbeddedData('OO_condition',  e.data.condition);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_party',      e.data.party);
