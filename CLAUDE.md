@@ -151,3 +151,4 @@ inside the 240px post box.
 - The repo is public, so participants can read it. Do not write comments,
   filenames, or commit messages that reveal the deception more than the existing
   ones already do. Avoid the words "ostracism" and "rejection" in filenames.
+
