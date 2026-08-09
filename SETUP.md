@@ -468,7 +468,7 @@ pasting a raw `<a>` tag into the normal rich-text editor just shows the
 literal tag text on screen instead of a working link.
 
 ```html
-<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&affil=${e://Field/affil}&source=${e://Field/source}&p=${e://Field/ResponseID}" target="_blank">Click here to begin the social network task</a>
+<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&affil=${e://Field/affil}&source=${e://Field/source}&p=${e://Field/ResponseID}" target="_blank" rel="opener">Click here to begin the social network task</a>
 ```
 
 This link uses `affil`/`source` rather than `party`/`rejector`. Unlike the
@@ -482,10 +482,16 @@ this question (see §5a below). Don't paste the plain `party=${e://Field/party}
 &rejector=${e://Field/rejector}` form into this particular link - that's what
 this whole obscuring step exists to avoid.
 
-Do not add `rel="noopener"` or `rel="noreferrer"` to this link - either one
-removes `window.opener` in the new tab, which is what carries the data back.
-If your organization's Qualtrics theme or a browser extension adds one of
-these automatically, this method will silently stop delivering data.
+**`rel="opener"` is required, not optional.** Modern Chrome (and most current
+browsers) silently treat any `target="_blank"` link as if `rel="noopener"`
+were set, unless `rel="opener"` explicitly overrides that default - so
+without it, `window.opener` in the new tab is `null` from the start and no
+data ever comes back, with no error anywhere to point at why. This is exactly
+what happened during initial testing of this method: the link worked, the tab
+opened, the task completed, and still nothing arrived, until `rel="opener"`
+was added. Do not add `rel="noopener"` or `rel="noreferrer"` either, and if
+your organization's Qualtrics theme or a browser extension force-adds one of
+those, this method will silently stop delivering data again.
 
 **Step 2.** Same question, **JavaScript** editor. Next stays hidden until
 the participant actually clicks the link, at which point a fallback timer
