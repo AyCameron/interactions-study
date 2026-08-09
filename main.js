@@ -74,7 +74,7 @@ $(function() {
     // method - see SETUP.md). Set this to YOUR Qualtrics domain, exactly as
     // it appears in the address bar (no trailing slash). Leave as '*' only
     // while testing.
-    settings.parentOrigin = 'https://ncsu.yul1.qualtrics.com';
+    settings.parentOrigin = 'https://ncsu.qualtrics.com';
 
     // ---------------------------------------------------------------
     // 3. TASK LENGTH
