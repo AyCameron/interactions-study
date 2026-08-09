@@ -25,6 +25,7 @@ div.main {
   margin-left: -16px;
   margin-top: 3px;
 	margin-bottom: -10px !important;
+	overflow-wrap: break-word;
 }
 
 img.avatar {
