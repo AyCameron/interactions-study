@@ -337,6 +337,49 @@ Practical notes:
 
 ---
 
+## 5a. Obscuring the URL for the new-tab method
+
+**Only needed if you're using §6's "new tab" method.** The iframe method never
+shows its URL to the participant, so it has no need for this - it keeps using
+plain `party`/`rejector` (main.js accepts both forms; see CLAUDE.md invariant 9).
+
+Declare two more Embedded Data fields at the very top of your flow, alongside
+`party`, `cond` and `rejector`:
+
+```
+Embedded Data: affil  = (blank)
+Embedded Data: source = (blank)
+```
+
+Then, immediately **after** the randomizer block from §5 (so `party` and
+`rejector` are already set) and **before** the paradigm question from §6,
+add four Branches - one Group per branch, each containing a single Embedded
+Data element:
+
+```
+Branch If: party = dem
+   └─ Embedded Data: affil = a
+
+Branch If: party = rep
+   └─ Embedded Data: affil = b
+
+Branch If: rejector = in
+   └─ Embedded Data: source = in
+
+Branch If: rejector = out
+   └─ Embedded Data: source = out
+```
+
+These four branches are siblings, all at the same level (not nested in each
+other or in the §5 randomizer) - each just translates a value that's already
+set into its obscured equivalent. `source` only ever copies `in`/`out`
+straight across; only `affil` actually changes the letters (dem→a, rep→b).
+
+Then use `affil`/`source` (not `party`/`rejector`) in the new-tab link's
+`href` in §6 - that's the whole point of this step.
+
+---
+
 ## 6. Qualtrics: embedding the paradigm
 
 The recommended approach keeps the participant inside the survey the whole time,
@@ -425,8 +468,19 @@ pasting a raw `<a>` tag into the normal rich-text editor just shows the
 literal tag text on screen instead of a working link.
 
 ```html
-<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&rejector=${e://Field/rejector}&p=${e://Field/ResponseID}" target="_blank">Click here to begin the social network task</a>
+<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&affil=${e://Field/affil}&source=${e://Field/source}&p=${e://Field/ResponseID}" target="_blank">Click here to begin the social network task</a>
 ```
+
+This link uses `affil`/`source` rather than `party`/`rejector`. Unlike the
+iframe method, this URL sits in the participant's address bar the whole time
+the second tab is open, so it uses the obscured parameter names/values
+(`affil`: `a`=dem, `b`=rep; `source`: unchanged `in`/`out`) instead of the
+plain readable ones - see CLAUDE.md invariant 9 for why, and its limits.
+This means Survey Flow needs two more Embedded Data fields, `affil` and
+`source`, derived from your existing `party`/`rejector` fields right before
+this question (see §5a below). Don't paste the plain `party=${e://Field/party}
+&rejector=${e://Field/rejector}` form into this particular link - that's what
+this whole obscuring step exists to avoid.
 
 Do not add `rel="noopener"` or `rel="noreferrer"` to this link - either one
 removes `window.opener` in the new tab, which is what carries the data back.

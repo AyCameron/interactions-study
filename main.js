@@ -287,13 +287,18 @@ $(function() {
                       : window.settings.avatar_dem;
     window.avatarexport = window.avatarfile;
 
-    // in-group / out-group is relative to the party just set
+    // in-group / out-group is relative to the party just set. The absolute
+    // option accepts either plain dem/rep or the obscured a/b codes (see
+    // CLAUDE.md) - whichever the caller used for the `source`/`rejector`
+    // URL param is what shows up here.
     if (window.rejector_request === 'in') {
       window.rejectorParty = window.party;
     } else if (window.rejector_request === 'out') {
       window.rejectorParty = (window.party === 'dem') ? 'rep' : 'dem';
-    } else if (window.rejector_request === 'dem' || window.rejector_request === 'rep') {
-      window.rejectorParty = window.rejector_request;
+    } else if (window.rejector_request === 'dem' || window.rejector_request === 'a') {
+      window.rejectorParty = 'dem';
+    } else if (window.rejector_request === 'rep' || window.rejector_request === 'b') {
+      window.rejectorParty = 'rep';
     } else {
       window.rejectorParty = (window.party === 'dem') ? 'rep' : 'dem';
     }
@@ -624,19 +629,30 @@ $(function() {
       window.participant = "unknown";
     }
 
-    // party from Qualtrics. Kept as party_survey for cross-checking; the
-    // participant's own answer on the avatar screen is what the paradigm
-    // actually runs on (see set_party).
-    window.party_survey = (window.QueryString.party === 'rep') ? 'rep'
-                        : (window.QueryString.party === 'dem') ? 'dem'
+    // party from Qualtrics. Two aliases are accepted: the plain `party`
+    // param (dem/rep - readable, fine for the iframe method and direct
+    // testing since neither exposes the URL to the participant) and the
+    // obscured `affil` param (a=dem, b=rep - see CLAUDE.md) used
+    // specifically by the new-tab method's visible link, where the URL
+    // sits in the participant's address bar. `affil` wins if both are
+    // present. Kept as party_survey for cross-checking; the participant's
+    // own answer on the avatar screen is what the paradigm actually runs
+    // on (see set_party).
+    var partyRaw = window.QueryString.affil === 'a' ? 'dem'
+                 : window.QueryString.affil === 'b' ? 'rep'
+                 : window.QueryString.party;
+    window.party_survey = (partyRaw === 'rep') ? 'rep'
+                        : (partyRaw === 'dem') ? 'dem'
                         : '';
     window.party = window.party_survey || 'dem';
     window.party_selfreport = '';
 
-    // rejector is resolved later, once the party is known.
-    //   in / out  - relative to the participant (recommended)
-    //   dem / rep - absolute
-    window.rejector_request = window.QueryString.rejector;
+    // rejector is resolved later, once the party is known. Same alias
+    // pattern: plain `rejector` (readable) or obscured `source` (see
+    // CLAUDE.md) - `source` wins if both are present.
+    //   in / out       - relative to the participant (recommended)
+    //   dem/rep or a/b - absolute
+    window.rejector_request = window.QueryString.source || window.QueryString.rejector;
 
     // redirect (standalone mode only)
     if (window.QueryString.redirect !== undefined && window.QueryString.redirect !== "") {

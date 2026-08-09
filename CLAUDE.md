@@ -85,6 +85,23 @@ analysis. Prefer being conservative over being clever.
 8. **Do not "fix" `9999999` timepoints.** They are deliberate padding for
    "this reaction never happens" and must stay above `settings.tasklength`.
 
+9. **`get_params()` accepts two names for party and for rejector: the plain
+   readable one (`party`=dem/rep, `rejector`=in/out/dem/rep) and an obscured
+   alias (`affil`=a/b, `source`=in/out/a/b) - whichever is present wins,
+   `affil`/`source` take priority if both are.** The obscured pair exists
+   specifically for the new-tab method's visible link, since that URL sits
+   in the participant's address bar the whole time, unlike the iframe method
+   where it's never shown. Use `party`/`rejector` for the iframe method and
+   for direct/local testing (more readable); use `affil`/`source` only in
+   the new-tab link's `href`. `affil`/`source` only defend against a
+   participant glancing at the address bar, not one who reads the public
+   repo's source (which still says `party`/`rejectorParty`/`REJECTED` etc.
+   throughout `main.js` and its comments) - don't oversell what this buys
+   you. Never let `dem`/`rep` reach the URL as a literal value under the
+   `affil` key (only `a`/`b`), or it defeats the point. Keep `affil`/`source`
+   disconnected from "party"/"democrat"/"republican" in spelling and don't
+   rename them to anything more mnemonic later without re-reading this.
+
 ## Data contract with Qualtrics
 
 `finish()` in `main.js` sends the same `postMessage` payload to whichever
