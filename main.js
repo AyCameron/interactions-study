@@ -529,11 +529,23 @@ $(function() {
       $('#final-continue').show();
       $('#timer').text('00:00');
 
-      $('#final-continue').on('click', function() {
+      // finish() used to run only on the Continue click. That left a gap
+      // for the new-tab method: the on-screen message tells the participant
+      // they may close this tab, and a participant who does that without
+      // clicking Continue first sent no data at all. sentOnce() below fires
+      // finish() the instant the timer ends, before the participant has to
+      // do anything, and the guard just stops the (still fully visible,
+      // still clickable) Continue button from sending a second copy.
+      var sent = false;
+      function sentOnce() {
+        if (sent) { return; }
+        sent = true;
         finish();
-        // Prevent a second click from sending a duplicate postMessage -
-        // most relevant to the new-tab method, where this tab stays open
-        // and clickable after finishing.
+      }
+      sentOnce();
+
+      $('#final-continue').on('click', function() {
+        sentOnce();
         $('#final-continue').hide();
       });
 
