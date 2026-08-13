@@ -514,11 +514,25 @@ Qualtrics.SurveyEngine.addOnload(function () {
     var fallbackTimer = null;
     var received = false;
 
+    // Belt-and-suspenders: force rel="opener" at runtime even if the
+    // question's saved HTML ever gets resaved with rel="noopener" instead
+    // (this has happened - see the rel="opener" note above).
+    document.getElementById('oolink').setAttribute('rel', 'opener');
+
     qthis.hideNextButton();
 
     // Start the fallback only once the participant actually clicks through,
     // not from page load - they may sit on this page a while first.
-    $(qthis.questionContainer).find('#oolink').on('click', function () {
+    //
+    // Plain document.getElementById + addEventListener, NOT jQuery's
+    // $(qthis.questionContainer).find(...) - that throws "$(...).find is
+    // not a function" in Qualtrics's JS execution context. Because it
+    // throws, everything after it in this function silently never runs,
+    // including the window.addEventListener('message', ...) block below -
+    // so the Qualtrics tab never listens for the paradigm's data at all.
+    // This has already cost a full debugging session once; do not
+    // reintroduce jQuery here.
+    document.getElementById('oolink').addEventListener('click', function () {
         fallbackTimer = setTimeout(function () {
             if (!received) { qthis.showNextButton(); }
         }, 600000); // adjust based on your piloting - see note above
