@@ -11,6 +11,15 @@ Real participants will run through this. Bugs here do not produce error
 messages — they produce quietly invalid data that is not discovered until
 analysis. Prefer being conservative over being clever.
 
+**The `poster` variable (in-group vs. out-group source of the post-paradigm
+misinformation stimuli) is Qualtrics-only** — it's an Embedded Data field set
+in Survey Flow alongside `cond`/`rejector`/`affil`/`source`, and `main.js`
+never reads or receives it. Whether it should ultimately be within-subject
+(matching the main study's preregistration) or between-subject (how it's
+currently built) is unresolved — see the warning at the top of `SETUP.md`.
+Since this code never touches `poster`, no change here is needed either way,
+but don't assume the current between-subjects Qualtrics build is settled.
+
 ## Files
 
 | File | Purpose |

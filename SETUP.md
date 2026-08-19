@@ -8,6 +8,18 @@ rejection, integrated with Qualtrics.
 and rejected participants receive active dislikes rather than simply being
 ignored. See §2b for what that changes about your design and your claims.
 
+**⚠ UNRESOLVED: poster information-source (in-group vs. out-group) is built
+as between-subjects, but the main study's preregistered hypotheses specify
+it as within-subject.** This lives entirely in Qualtrics (the `poster`
+Embedded Data field set alongside `cond`/`rejector`/`affil`/`source` in the
+randomizer Groups — see §5) — the paradigm itself never receives or uses a
+poster variable, so nothing here in `main.js` is affected either way. Do not
+build or change anything based on this until it's confirmed with whoever
+owns the preregistration; a within-subject redesign would mean each
+participant sees both in-group- and out-group-posted stimuli rather than
+being assigned to just one, which changes the Loop & Merge / randomizer
+structure in Survey Flow, not just a value somewhere.
+
 ---
 
 ## 1. What changed from the original
