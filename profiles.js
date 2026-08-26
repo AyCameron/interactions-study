@@ -95,7 +95,7 @@ window.profiles = {
       {
         "avatar": "avatars/dem.png",
         "username": "Heather",
-        "text": "Hey, guys. I'm 19, Korean American. I consider myself pretty nice, though not a total angel. I just like being friendly to people I meet. In my spare time, I like making all kinds of friends, having conversations about whatever, looking at paintings, using makeup, reading, singing (show choir representtt!), making jewelry, and eating delicious food. Enjoy your day, stay out of trouble.",
+        "text": "Hey, guys. I'm 19, Korean American. I consider myself pretty nice, though not a total angel. I just like being friendly to people I meet. In my spare time, I like making all kinds of friends, having conversations about whatever, looking at paintings, using makeup, reading, singing (show choir representtt!), making jewelry, and eating delicious food. Enjoy your day, stay out of trouble. ❤️",
         "likes": [17000, 43000, 86000, 124000, 161000],
         "dislikes": [9999999]
       },
@@ -179,7 +179,7 @@ window.profiles = {
       {
         "avatar": "avatars/rep.png",
         "username": "Heather",
-        "text": "Hey, guys. I'm 19, Korean American. I consider myself pretty nice, though not a total angel. I just like being friendly to people I meet. In my spare time, I like making all kinds of friends, having conversations about whatever, looking at paintings, using makeup, reading, singing (show choir representtt!), making jewelry, and eating delicious food. Enjoy your day, stay out of trouble.",
+        "text": "Hey, guys. I'm 19, Korean American. I consider myself pretty nice, though not a total angel. I just like being friendly to people I meet. In my spare time, I like making all kinds of friends, having conversations about whatever, looking at paintings, using makeup, reading, singing (show choir representtt!), making jewelry, and eating delicious food. Enjoy your day, stay out of trouble. ❤️",
         "likes": [17000, 43000, 86000, 124000, 161000],
         "dislikes": [9999999]
       },
