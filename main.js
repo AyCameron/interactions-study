@@ -44,7 +44,7 @@ $(function() {
     settings.ask_party = true;
 
     // Minimum characters for the self-introduction.
-    settings.min_chars = 240;
+    settings.min_chars = 244;
     settings.max_chars = 400;
 
     // Because there is nothing to choose between, the avatar selection

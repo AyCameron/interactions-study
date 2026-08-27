@@ -31,7 +31,7 @@ window.profiles = {
       {
         "avatar": "avatars/dem.png",
         "username": "George",
-        "text": "I'm a 19 year old dude from Wisconsin (commence making fun of my accent). I love music, I've been teaching myself guitar for a couple years now. Besides music I like learning languages, psychology, drawing, and writing. I'm hoping to double major in linguistics and psych, still figuring out the rest of my plan.",
+        "text": "I'm a 19 year old dude from Wisconsin (commence making fun of my accent). I love music. Besides music I like learning languages, psychology, drawing, and writing.",
         "likes": [22000, 61000, 118000, 152000],
         "dislikes": [9999999]
       },
@@ -46,14 +46,14 @@ window.profiles = {
       {
         "avatar": "avatars/dem.png",
         "username": "Dan",
-        "text": "Hi there, I'm 57 years old, married, with two kids. I've been a computer programmer for about 30 years, but don't worry: I don't have the dusty haircut, oversized buttoned shirt and nerdie big frame glasses. On weekends I like grilling out and puttering around in the garage with old radios. Looking forward to working with you all.",
+        "text": "Hi there, I'm 57 years old, married, with two kids. I've been a computer programmer for about 30 years, but don't worry: I don't have the dusty haircut, oversized buttoned shirt and nerdie big frame glasses. Looking forward to working with you all.",
         "likes": [30000, 74000, 129000],
         "dislikes": [82000]
       },
       {
         "avatar": "avatars/dem.png",
         "username": "Anca",
-        "text": "I am a Computer Science student, interested in Natural Language processing. Also a lover of loose leaf tea and a Semantic Web enthusiast. I'm hoping to go into machine learning research after I graduate, or maybe teach. I'm curious about what this task is about.",
+        "text": "I am a Computer Science student, interested in Natural Language processing. Also a lover of loose leaf tea and a Semantic Web enthusiast. I'm curious about what this task is about.",
         "likes": [26000, 88000, 141000, 166000],
         "dislikes": [9999999]
       },
@@ -74,7 +74,7 @@ window.profiles = {
       {
         "avatar": "avatars/dem.png",
         "username": "Lauren",
-        "text": "I'm Lauren, I love to hang out with friends and go shopping. On weekends you can usually find me at the mall or trying out a new coffee shop with my roommates. I'm also really into true crime podcasts, I've probably listened to way too many of them at this point. Just doing some online studies here!",
+        "text": "I'm Lauren, I love to hang out with friends and go shopping. Just doing some online studies here!",
         "likes": [65000, 121000],
         "dislikes": [44000, 139000]
       },
@@ -88,7 +88,7 @@ window.profiles = {
       {
         "avatar": "avatars/dem.png",
         "username": "Jane",
-        "text": "Dear all, my name is Jane and I have an important interview coming up soon. This is all I can think about these days, I've been practicing my answers in the mirror and everything. Outside of that stress I usually enjoy baking and long walks with my dog. I hope you're doing well.",
+        "text": "Dear all, my name is Jane and I have an important interview coming up soon. This is all I can think about these days. I hope you're doing well.",
         "likes": [51000, 103000, 144000],
         "dislikes": [99000]
       },
@@ -102,7 +102,7 @@ window.profiles = {
       {
         "avatar": "avatars/dem.png",
         "username": "Arjen",
-        "text": "My name's Arjen, I study Artificial Intelligence. Also I like to use my free time to make all kinds of different things, mostly small electronics projects and 3D printing. I'm kind of a nerd too, I guess. I also play way too much chess online.",
+        "text": "My name's Arjen, I study Artificial Intelligence. Also I like to use my free time to make all kinds of different things... I'm kind of a nerd too, I guess.",
         "likes": [34000, 79000, 137000],
         "dislikes": [113000]
       }
@@ -115,7 +115,7 @@ window.profiles = {
       {
         "avatar": "avatars/rep.png",
         "username": "George",
-        "text": "I'm a 19 year old dude from Wisconsin (commence making fun of my accent). I love music, I've been teaching myself guitar for a couple years now. Besides music I like learning languages, psychology, drawing, and writing. I'm hoping to double major in linguistics and psych, still figuring out the rest of my plan.",
+        "text": "I'm a 19 year old dude from Wisconsin (commence making fun of my accent). I love music. Besides music I like learning languages, psychology, drawing, and writing.",
         "likes": [22000, 61000, 118000, 152000],
         "dislikes": [9999999]
       },
@@ -130,14 +130,14 @@ window.profiles = {
       {
         "avatar": "avatars/rep.png",
         "username": "Dan",
-        "text": "Hi there, I'm 57 years old, married, with two kids. I've been a computer programmer for about 30 years, but don't worry: I don't have the dusty haircut, oversized buttoned shirt and nerdie big frame glasses. On weekends I like grilling out and puttering around in the garage with old radios. Looking forward to working with you all.",
+        "text": "Hi there, I'm 57 years old, married, with two kids. I've been a computer programmer for about 30 years, but don't worry: I don't have the dusty haircut, oversized buttoned shirt and nerdie big frame glasses. Looking forward to working with you all.",
         "likes": [30000, 74000, 129000],
         "dislikes": [82000]
       },
       {
         "avatar": "avatars/rep.png",
         "username": "Anca",
-        "text": "I am a Computer Science student, interested in Natural Language processing. Also a lover of loose leaf tea and a Semantic Web enthusiast. I'm hoping to go into machine learning research after I graduate, or maybe teach. I'm curious about what this task is about.",
+        "text": "I am a Computer Science student, interested in Natural Language processing. Also a lover of loose leaf tea and a Semantic Web enthusiast. I'm curious about what this task is about.",
         "likes": [26000, 88000, 141000, 166000],
         "dislikes": [9999999]
       },
@@ -158,7 +158,7 @@ window.profiles = {
       {
         "avatar": "avatars/rep.png",
         "username": "Lauren",
-        "text": "I'm Lauren, I love to hang out with friends and go shopping. On weekends you can usually find me at the mall or trying out a new coffee shop with my roommates. I'm also really into true crime podcasts, I've probably listened to way too many of them at this point. Just doing some online studies here!",
+        "text": "I'm Lauren, I love to hang out with friends and go shopping. Just doing some online studies here!",
         "likes": [65000, 121000],
         "dislikes": [44000, 139000]
       },
@@ -172,7 +172,7 @@ window.profiles = {
       {
         "avatar": "avatars/rep.png",
         "username": "Jane",
-        "text": "Dear all, my name is Jane and I have an important interview coming up soon. This is all I can think about these days, I've been practicing my answers in the mirror and everything. Outside of that stress I usually enjoy baking and long walks with my dog. I hope you're doing well.",
+        "text": "Dear all, my name is Jane and I have an important interview coming up soon. This is all I can think about these days. I hope you're doing well.",
         "likes": [51000, 103000, 144000],
         "dislikes": [99000]
       },
@@ -186,7 +186,7 @@ window.profiles = {
       {
         "avatar": "avatars/rep.png",
         "username": "Arjen",
-        "text": "My name's Arjen, I study Artificial Intelligence. Also I like to use my free time to make all kinds of different things, mostly small electronics projects and 3D printing. I'm kind of a nerd too, I guess. I also play way too much chess online.",
+        "text": "My name's Arjen, I study Artificial Intelligence. Also I like to use my free time to make all kinds of different things... I'm kind of a nerd too, I guess.",
         "likes": [34000, 79000, 137000],
         "dislikes": [113000]
       }
