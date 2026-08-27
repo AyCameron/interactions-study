@@ -146,7 +146,7 @@ Gotchas specific to this version:
   is `true`, so you must actually click the matching Democrat/Republican radio
   on the avatar screen for the cell to reflect what the URL implies. Submit is
   correctly blocked ("Please select an option") until you do.
-- The introduction box needs at least `settings.min_chars` (244) characters or
+- The introduction box needs at least `settings.min_chars` (150) characters or
   the description screen will reject it.
 - Lowering `settings.tasklength` for faster testing only makes the "final
   continue" button appear sooner — it does **not** speed up reaction delivery.
