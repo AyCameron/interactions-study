@@ -1,18 +1,25 @@
 // =====================================================================
 // GROUP MEMBER PROFILES
 // =====================================================================
-// Eleven fake group members. The BIOS ARE IDENTICAL in the Democratic and
+// Ten fake group members. The BIOS ARE IDENTICAL in the Democratic and
 // Republican versions - only the avatar differs. That is deliberate: it
 // holds every word of content constant across conditions, so the partisan
 // manipulation is carried entirely by the party badge and nothing else can
 // confound it. Do not add partisan wording to one set without adding a
 // matched cue to the other.
 //
+// The roster is always a fixed 5 Democrat / 5 Republican split in every
+// condition - see main.js set_settings() §8 (TEAM_A/TEAM_B) for which five
+// names play which team, and how the new `roster`/`rst` URL parameter
+// counterbalances which team shows which party's badge across sessions.
+//
 // Each profile has:
 //   avatar   - avatars/dem.png or avatars/rep.png (everyone shares one
 //              badge per party)
 //   username - shown on the post AND used in the reaction popups. Must
-//              match the names in settings.likes_by_* / dislikes_by_*
+//              match a name in TEAM_A/TEAM_B (main.js) to ever be selected
+//              as a reactor - see settings.likes_by/dislikes_by, computed
+//              at runtime, not the static arrays this used to be.
 //   text     - the self-introduction, on ONE line, no double quotes inside
 //   likes    - millisecond timepoints at which this member receives a like
 //   dislikes - millisecond timepoints at which this member receives a
@@ -25,7 +32,7 @@
 
 window.profiles = {
 
-  // DEMOCRATIC GROUP - all eleven show the donkey badge
+  // DEMOCRATIC GROUP - all ten show the donkey badge
   "dem": {
     "posts": [
       {
@@ -98,13 +105,6 @@ window.profiles = {
         "text": "Hey, guys. I'm 19, Korean American. I consider myself pretty nice, though not a total angel. I just like being friendly to people I meet. In my spare time, I like making all kinds of friends, having conversations about whatever, looking at paintings, using makeup, reading, singing (show choir representtt!), making jewelry, and eating delicious food. Enjoy your day, stay out of trouble. ❤️",
         "likes": [17000, 43000, 86000, 124000, 161000],
         "dislikes": [9999999]
-      },
-      {
-        "avatar": "avatars/dem.png",
-        "username": "Arjen",
-        "text": "My name's Arjen, I study Artificial Intelligence. Also I like to use my free time to make all kinds of different things... I'm kind of a nerd too, I guess.",
-        "likes": [34000, 79000, 137000],
-        "dislikes": [113000]
       }
     ]
   },
@@ -182,13 +182,6 @@ window.profiles = {
         "text": "Hey, guys. I'm 19, Korean American. I consider myself pretty nice, though not a total angel. I just like being friendly to people I meet. In my spare time, I like making all kinds of friends, having conversations about whatever, looking at paintings, using makeup, reading, singing (show choir representtt!), making jewelry, and eating delicious food. Enjoy your day, stay out of trouble. ❤️",
         "likes": [17000, 43000, 86000, 124000, 161000],
         "dislikes": [9999999]
-      },
-      {
-        "avatar": "avatars/rep.png",
-        "username": "Arjen",
-        "text": "My name's Arjen, I study Artificial Intelligence. Also I like to use my free time to make all kinds of different things... I'm kind of a nerd too, I guess.",
-        "likes": [34000, 79000, 137000],
-        "dislikes": [113000]
       }
     ]
   }

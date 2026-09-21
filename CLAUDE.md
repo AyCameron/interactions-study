@@ -26,10 +26,10 @@ but don't assume the current between-subjects Qualtrics build is settled.
 |---|---|
 | `index.html` | All screens and all participant-facing text; two Mustache templates at the bottom |
 | `main.js` | All logic. Editable parameters are in `set_settings()` at the top, in numbered sections |
-| `profiles.js` | The eleven fake group members, in a Democratic and a Republican version (identical bios, only the avatar differs). Despite the original's `.json` name this is JavaScript |
+| `profiles.js` | The ten fake group members, in a Democratic and a Republican version (identical bios, only the avatar differs). Despite the original's `.json` name this is JavaScript |
 | `style.css` | Appearance. Dislike-button styles are in a marked block at the bottom |
 | `shortcut.js` | Vendored keyboard library, untouched from the original |
-| `avatars/` | Exactly two images: `dem.png` (donkey on blue) and `rep.png` (elephant on red), 250x250 RGBA with transparent corners. One badge per party, used by the participant and the group members — 8 of the 11 show the majority party's badge, 3 show the minority's (invariant 3b) |
+| `avatars/` | Exactly two images: `dem.png` (donkey on blue) and `rep.png` (elephant on red), 250x250 RGBA with transparent corners. One badge per party, used by the participant and the group members — always a fixed 5 dem/5 rep split, counterbalanced across sessions by `roster` (invariant 3b) |
 | `SETUP.md` | Qualtrics integration, randomization, test checklist. Keep in sync with code changes |
 | `CHANGE_REQUEST.md` | A historical record of a prior change request (11-member roster, in-paradigm party self-report, etc.) that has already been applied. Not something to re-apply |
 
@@ -39,33 +39,48 @@ but don't assume the current between-subjects Qualtrics build is settled.
    exists. An out-of-range `c` parameter falls back to 1 rather than erroring.
 
 1b. **The design is 2 (condition) x 2 (in-group / out-group), nested within
-   participant party — eight cells.** `rejector` accepts `in`/`out` (relative to the
-   participant, which is what Qualtrics sends) or `dem`/`rep` (absolute).
-   `window.rejectorType` is derived from it and must keep being exported, because
-   the analysis keys on it. `window.rejectorParty` is the **majority** party for
-   the cell (see 3b) — most reactions come from it, but not all.
+   participant party — eight cells.** `roster` (invariant 3b) is a separate
+   counterbalancing factor, not a manipulated cell - it changes which specific
+   people are on screen, never the manipulation itself. `rejector` accepts
+   `in`/`out` (relative to the participant, which is what Qualtrics sends) or
+   `dem`/`rep` (absolute). `window.rejectorType` is derived from it and must
+   keep being exported, because the analysis keys on it. `window.rejectorParty`
+   is the party of the team that reacts to the participant (see 3b) — ALL of
+   the participant's reactions come from it now, not most.
 
-2. **Total reactions to the participant's post are held constant at 6.**
-   Rejected = 1 like + 5 dislikes. Included = 6 likes + 0 dislikes. Only the
-   valence differs. If you touch `condition_*_likes` or `condition_*_dislikes`,
-   recount both totals and say so explicitly in your reply.
+2. **Total reactions to the participant's post are held constant at 5, a pure
+   valence mirror.** Rejected = 0 likes + 5 dislikes. Included = 5 likes + 0
+   dislikes. Nothing mixed, unlike the earlier 1-like/5-dislike design this
+   replaced - see SETUP.md for why 5, not the original paper's 6 (it's a
+   proportion of group size, not a universal constant, and 5 is that
+   proportion scaled to this project's 5-person reacting team, invariant 3b).
+   If you touch `condition_*_likes` or `condition_*_dislikes`, recount both
+   totals and say so explicitly in your reply.
 
 3. **Total likes visible on screen are held constant across conditions** via the
-   compensating group member at canonical position 1 (Sarah). Participant 1 +
-   peer 9 = participant 6 + peer 4 = 10. Moving her out of position 1, or out of
-   `minority_role_names` (see 3b), breaks `adjust_to_condition()`.
+   compensating group member at canonical position 1 (Sarah). Participant 0 +
+   peer 9 = participant 5 + peer 4 = 9. Moving her out of position 1 breaks
+   `adjust_to_condition()`.
 
-3b. **The 11 group members are a majority/minority mix, not one uniform party.**
-   `settings.minority_role_names` (§8 in `main.js`) fixes *which people* are
-   minority-role, independent of which party ends up being majority for a given
-   cell — only their avatar changes. Split is 8 majority / 3 minority. Of the 6
-   reactions the participant receives, 5 are majority-authored and 1 is
-   minority-authored (Kim, deliberately first in `likes_by`) in every condition.
-   Sarah MUST stay in `minority_role_names`: anchoring the compensating member's
-   inflated like-count to minority (the smaller subgroup, 3 vs 8) keeps total
-   visible likes roughly proportionate across majority/minority instead of
-   minority reading as simply "fewer people, fewer likes." Do not move her to
-   majority-role, and do not change the 8/3 or 5/6-1/6 splits as a side effect
+3b. **The roster is a fixed 5 Democrat / 5 Republican split in EVERY condition,
+   never varying with `rejector`.** This replaced an earlier 8 majority/3
+   minority design after testing found that letting roster composition change
+   with `rejector` confounded the interaction-source manipulation: an
+   out-group cell wasn't just changing who reacted to the participant, it was
+   also changing how many people in the room visually matched them (see
+   SETUP.md §2c). `settings.TEAM_A`/`TEAM_B` (§8 in `main.js`) are two fixed
+   5-person halves of the 10-person roster; `window.roster` (`1`/`2`, from
+   `get_params()`, obscured alias `rst` per invariant 9's pattern)
+   counterbalances which team shows the dem badge vs the rep badge across
+   participants, so no single bio is permanently tied to one party across the
+   study. `rejector` (in/out) now controls **which team reacts** to the
+   participant — `resolve_reactors()` computes `settings.likes_by`/
+   `dislikes_by` from this at runtime, not from static arrays, and it must run
+   after `window.party`/`window.roster`/`window.rejectorType` are all known
+   (called from `set_party()`, right after `load_profiles()`). All 5 of the
+   participant's reactions come from the same team, every condition. Sarah's
+   team membership doesn't matter to her compensating-member role (invariant
+   3) — do not reintroduce a majority/minority distinction as a side effect
    of unrelated work.
 
 4. **`settings.compensate_dislikes` is deliberately `false`.** Turning it on
@@ -85,8 +100,9 @@ but don't assume the current between-subjects Qualtrics build is settled.
 6. **Every name in `likes_by` and `dislikes_by` must be a `username` present in
    `profiles.js`.** (These are no longer split by party — every username exists
    identically in both the dem and rep lists, so one list now covers both; see
-   3b for the majority/minority split among them.) A reaction from someone not
-   on screen gives away the deception.
+   3b for `TEAM_A`/`TEAM_B`, which is what `likes_by`/`dislikes_by` are computed
+   from at runtime.) A reaction from someone not on screen gives away the
+   deception.
 
 7. **All external resources must load over `https://`.** Qualtrics is https and
    browsers block mixed content, which silently blanks the whole study.
@@ -109,7 +125,8 @@ but don't assume the current between-subjects Qualtrics build is settled.
    you. Never let `dem`/`rep` reach the URL as a literal value under the
    `affil` key (only `a`/`b`), or it defeats the point. Keep `affil`/`source`
    disconnected from "party"/"democrat"/"republican" in spelling and don't
-   rename them to anything more mnemonic later without re-reading this.
+   rename them to anything more mnemonic later without re-reading this. The
+   same plain/obscured pattern applies to `roster`/`rst` (invariant 3b).
 
 ## Data contract with Qualtrics
 
@@ -127,17 +144,19 @@ Participant IDs are **strings** (Qualtrics ResponseIDs look like
 ## How to test a change
 
 Serve locally (e.g. `python3 -m http.server 8000`) and open all eight cells
-from SETUP.md §7:
+from SETUP.md §7. `roster` isn't part of the manipulated design (invariant
+3b), so it doesn't need its own set of cells, but test both `1` and `2` at
+least once each so you've seen both counterbalancing directions:
 
 ```
-http://localhost:8000/index.html?c=1&party=dem&rejector=out&p=TEST_D_REJ_OUT
-http://localhost:8000/index.html?c=2&party=dem&rejector=out&p=TEST_D_INC_OUT
-http://localhost:8000/index.html?c=1&party=dem&rejector=in&p=TEST_D_REJ_IN
-http://localhost:8000/index.html?c=2&party=dem&rejector=in&p=TEST_D_INC_IN
-http://localhost:8000/index.html?c=1&party=rep&rejector=out&p=TEST_R_REJ_OUT
-http://localhost:8000/index.html?c=2&party=rep&rejector=out&p=TEST_R_INC_OUT
-http://localhost:8000/index.html?c=1&party=rep&rejector=in&p=TEST_R_REJ_IN
-http://localhost:8000/index.html?c=2&party=rep&rejector=in&p=TEST_R_INC_IN
+http://localhost:8000/index.html?c=1&party=dem&rejector=out&roster=1&p=TEST_D_REJ_OUT
+http://localhost:8000/index.html?c=2&party=dem&rejector=out&roster=1&p=TEST_D_INC_OUT
+http://localhost:8000/index.html?c=1&party=dem&rejector=in&roster=1&p=TEST_D_REJ_IN
+http://localhost:8000/index.html?c=2&party=dem&rejector=in&roster=1&p=TEST_D_INC_IN
+http://localhost:8000/index.html?c=1&party=rep&rejector=out&roster=2&p=TEST_R_REJ_OUT
+http://localhost:8000/index.html?c=2&party=rep&rejector=out&roster=2&p=TEST_R_INC_OUT
+http://localhost:8000/index.html?c=1&party=rep&rejector=in&roster=2&p=TEST_R_REJ_IN
+http://localhost:8000/index.html?c=2&party=rep&rejector=in&roster=2&p=TEST_R_INC_IN
 ```
 
 Gotchas specific to this version:
@@ -156,10 +175,13 @@ Gotchas specific to this version:
   `180000` before committing either way.
 
 Check: no console errors, no broken images, the party self-report screen
-actually gates progress, reaction counts match the design table (5 of 6
-majority-authored, 1 minority-authored — invariant 3b), the closing message
-appears with the timer at `00:00`, Like and Dislike lock together, buttons fit
-inside the 240px post box.
+actually gates progress, reaction counts match the design table (0 likes/5
+dislikes rejected, 5 likes/0 dislikes included — invariant 2), all 5
+reactions come from the same team every time (invariant 3b), the roster
+always shows 5 dem/5 rep regardless of condition, the closing message
+appears with the timer at `00:00`, Like and Dislike lock together, buttons
+fit inside the 240px post box, and the persistent reaction feed fills in
+correctly alongside the toasts.
 
 ## Working style for this repo
 

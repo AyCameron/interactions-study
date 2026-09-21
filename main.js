@@ -90,15 +90,14 @@ $(function() {
     // A dummy value of 9999999 pads a one-item list; it is never reached
     // because it is longer than the task.
     //
-    // NOTE: the original code had 1320000 (22 minutes) in the inclusion
-    // list, which meant the "6 likes" condition actually delivered only 5.
-    // It is corrected to 132000 here. Decide deliberately which you want.
+    // Rejected/Included mirror each other exactly (0 vs 5, matching 4b's
+    // 5 vs 0 dislikes) - see 4b for why 5, not 6.
 
-    // CONDITION 1 = REJECTED (1 like)
-    settings.condition_1_likes = [12000, 9999999];
+    // CONDITION 1 = REJECTED (0 likes; the dummy timepoint never fires)
+    settings.condition_1_likes = [9999999];
 
-    // CONDITION 2 = INCLUDED (6 likes)
-    settings.condition_2_likes = [10000, 15000, 35000, 80000, 132000, 150000];
+    // CONDITION 2 = INCLUDED (5 likes)
+    settings.condition_2_likes = [10000, 35000, 80000, 132000, 150000];
 
     // ---------------------------------------------------------------
     // 4b. NUMBER AND TIMING OF "DISLIKES" THE PARTICIPANT RECEIVES
@@ -106,13 +105,16 @@ $(function() {
     // This is what turns condition 1 from OSTRACISM (being ignored) into
     // REJECTION (being actively disapproved of).
     //
-    // The defaults hold TOTAL REACTIONS constant at 6 in both conditions
-    // and flip only their valence:
-    //     rejected  = 1 like  + 5 dislikes
-    //     included  = 6 likes + 0 dislikes
-    // That means both groups get the same amount of attention, so any
-    // difference is about being evaluated negatively rather than about
-    // being noticed more or less. Change these only deliberately.
+    // Rejected and Included are now pure mirror images - all-dislikes vs.
+    // all-likes, nothing mixed - matching Lutz & Schneider's (2021)
+    // rejection extension of Wolf et al. (2015), where Rejected mirrors
+    // Included exactly. The original paper's counts (6 likes/12/1, out of
+    // an 11-person pool) aren't universal constants - they're roughly
+    // "half the group," and 5 is that same proportion scaled to this
+    // project's fixed 5-person reacting team (§8) instead of 11 people.
+    // 5 reactions from 5 people also means every reaction maps to a
+    // different named person with no repeats. Change these only
+    // deliberately, and keep both conditions' totals equal if you do.
 
     // CONDITION 1 = REJECTED (5 dislikes)
     settings.condition_1_dislikes = [20000, 45000, 70000, 105000, 140000];
@@ -120,11 +122,13 @@ $(function() {
     // CONDITION 2 = INCLUDED (0 dislikes; the dummy timepoint never fires)
     settings.condition_2_dislikes = [9999999];
 
-    // Names that appear in the "X disliked your post" popups. Same rule as
-    // likes_by: every name must be a username in profiles.js. All five are
-    // majority-role names - see §8. Every name exists identically in both
-    // party's profiles.js lists, so there is no dem/rep variant to pick.
-    settings.dislikes_by = ['Lauren', 'Arjen', 'Dan', 'Mary', 'Heather'];
+    // likes_by/dislikes_by are NOT set here - they're computed at runtime
+    // in resolve_reactors() (called from set_party(), after party/roster/
+    // rejectorType are all known) from whichever 5-person team (§8) is
+    // in-group or out-group for this participant. See resolve_reactors()
+    // below set_party().
+    settings.likes_by = [];
+    settings.dislikes_by = [];
 
     // Can a participant both like AND dislike the same post?
     // true = one reaction per post (clicking either disables both).
@@ -154,17 +158,9 @@ $(function() {
     // ---------------------------------------------------------------
     // 6. WHO THE PARTICIPANT'S LIKES APPEAR TO COME FROM
     // ---------------------------------------------------------------
-    // These names appear in the "X liked your post" popups. EVERY name
-    // here must also be a username of a profile in profiles.js, or
-    // participants will get likes from people who are not in the group -
-    // an obvious tell.
-    // The list is used in order, so the FIRST name is the one who likes
-    // the rejected participant's single post. Kim is first deliberately:
-    // she is the one minority-role reactor (see §8), so putting her first
-    // makes her the sole like-giver in condition 1, and one of the six in
-    // condition 2 - a consistent 5-majority/1-minority split either way.
-
-    settings.likes_by = ['Kim', 'Dan', 'Anca', 'Niki', 'George', 'Heather'];
+    // See §8 below - settings.likes_by is computed at runtime from §8's
+    // TEAM_A/TEAM_B, not set here. This section number is kept so §-refs
+    // elsewhere in the codebase and in SETUP.md/CLAUDE.md still make sense.
 
     // ---------------------------------------------------------------
     // 7. SHUFFLE THE ORDER OF THE GROUP MEMBERS?
@@ -175,28 +171,35 @@ $(function() {
     settings.shuffle_profiles = true;
 
     // ---------------------------------------------------------------
-    // 8. MAJORITY / MINORITY GROUP COMPOSITION (interaction source)
+    // 8. FIXED 5/5 ROSTER + COUNTERBALANCING (interaction source)
     // ---------------------------------------------------------------
-    // The 11 group members are a mix of the majority party (whichever
-    // party rejector resolves to - the "interaction source" manipulation) and a
-    // minority presence from the other party. Which specific people play
-    // which role is fixed here, independent of which party ends up being
-    // majority for a given participant - only their avatar (and the
-    // majority/minority label) changes per cell.
+    // The roster is a fixed 5 Democrat / 5 Republican split in EVERY
+    // condition - unlike the old majority/minority design, group
+    // composition never changes with `rejector`, so an out-group cell
+    // changes who reacts to the participant without also changing how
+    // many people in the room visually match them (that was a real
+    // confound - see SETUP.md §2c).
     //
-    // Roster: 8 majority-role / 3 minority-role, an 8/3 split.
-    // Reactions to the participant: 5 majority-authored / 1 minority-
-    // authored out of every 6 (see likes_by/dislikes_by above), because
-    // Kim - the sole minority reactor - is deliberately first in likes_by.
+    // TEAM_A/TEAM_B are two fixed 5-person halves of the 10-person roster
+    // (profiles.js). Which team shows the dem badge vs the rep badge is
+    // counterbalanced across participants by the `roster`/`rst` URL
+    // parameter (see get_params()): roster=1 -> TEAM_A dem/TEAM_B rep,
+    // roster=2 -> flipped. Averaged across the study, every one of the 10
+    // bios shows as dem for about half of participants and rep for the
+    // other half, so no bio-level difference (writing style, warmth,
+    // whatever) is permanently yoked to one party.
     //
-    // Sarah MUST stay in this list. She is also the compensating member
-    // at canonical position 1 (see §5 / adjust_to_condition()), and her
-    // artificially large received-like-count is deliberately anchored to
-    // whichever party is minority for a cell - minority has fewer people
-    // (3 vs 8), so this keeps total visible likes roughly proportionate
-    // across majority/minority instead of minority reading as simply
-    // "fewer people, fewer likes." Do not move her to majority-role.
-    settings.minority_role_names = ['Sarah', 'Kim', 'Jane'];
+    // `rejector` (in/out) now controls WHICH team reacts to the
+    // participant - the in-group team if rejector=in, the out-group team
+    // if rejector=out - not the roster's composition. See
+    // resolve_reactors() below set_party(), which computes
+    // settings.likes_by/dislikes_by from this at runtime.
+    //
+    // Sarah MUST stay at canonical position 1 - she's the compensating
+    // member (see §5 / adjust_to_condition()), independent of which team
+    // she's on or which party that team shows.
+    settings.TEAM_A = ['George', 'Dan', 'Niki', 'Lauren', 'Jane'];
+    settings.TEAM_B = ['Sarah', 'Anca', 'Mary', 'Kim', 'Heather'];
   }
 
   // ===================================================================
@@ -305,6 +308,7 @@ $(function() {
     window.rejectorType = (window.rejectorParty === window.party) ? 'ingroup' : 'outgroup';
 
     load_profiles();
+    resolve_reactors();
     adjust_to_condition();
   }
 
@@ -370,6 +374,32 @@ $(function() {
     });
   }
 
+  // --- Persistent reaction feed -------------------------------------------
+  // Appends a permanent entry to #reaction-feed each time the participant
+  // receives a like or dislike, alongside the existing alertify toast (see
+  // the .userslikes/.userdislikes blocks in init_task()) - keeps the
+  // manipulation visible for the whole task instead of flashing and
+  // disappearing. Looks up the reactor's avatar from window.others.posts,
+  // which load_profiles() has already populated by the time this can fire.
+  function add_to_reaction_feed(username, type) {
+    $('#reaction-feed-label').show();
+
+    var match = window.others.posts.filter(function(p) {
+      return p.username === username;
+    })[0];
+    var avatarSrc = match ? match.avatar : '';
+
+    var cls = (type === 'like') ? 'reaction-feed-like' : 'reaction-feed-dislike';
+    var label = (type === 'like') ? 'liked' : 'disliked';
+
+    var entry = $('<div>').addClass('reaction-feed-entry ' + cls);
+    if (avatarSrc) {
+      entry.append($('<img>').attr('src', avatarSrc).addClass('reaction-feed-avatar'));
+    }
+    entry.append($('<span>').addClass('reaction-feed-text').text(username + ' ' + label + ' your post'));
+    $('#reaction-feed').append(entry);
+  }
+
   // --- Slide: The task --------------------------------------------------
   function init_task() {
 
@@ -422,12 +452,14 @@ $(function() {
 
       for (var i = 0; i < times.length; i++) {
         times[i] = +times[i];
-        var themsg = usernames[i] + " liked your post";
+        var thename = usernames[i];
+        var themsg = thename + " liked your post";
 
-        setTimeout(function(msg) {
+        setTimeout(function(msg, name) {
           that.text(parseInt(that.text()) + 1);
           alertify.success(msg);
-        }, times[i], themsg);
+          add_to_reaction_feed(name, 'like');
+        }, times[i], themsg, thename);
       }
     });
 
@@ -452,12 +484,14 @@ $(function() {
 
       for (var i = 0; i < times.length; i++) {
         times[i] = +times[i];
-        var themsg = usernames[i] + " disliked your post";
+        var thename = usernames[i];
+        var themsg = thename + " disliked your post";
 
-        setTimeout(function(msg) {
+        setTimeout(function(msg, name) {
           that.text(parseInt(that.text()) + 1);
           alertify.error(msg);
-        }, times[i], themsg);
+          add_to_reaction_feed(name, 'dislike');
+        }, times[i], themsg, thename);
       }
     });
 
@@ -580,6 +614,7 @@ $(function() {
                         && window.party_survey === window.party_selfreport) ? 1 : 0,
       rejectorParty: window.rejectorParty,
       rejectorType:  window.rejectorType,   // "ingroup" or "outgroup"
+      roster:       window.roster,          // "1"/"2" - which team shows which party
       username:     window.username,
       avatar:       window.avatarexport,
       description:  window.description,
@@ -615,6 +650,7 @@ $(function() {
         + '&party=' + window.party
         + '&rejector=' + window.rejectorParty
         + '&rejectorType=' + window.rejectorType
+        + '&roster=' + window.roster
         + '&av='    + encodeURIComponent(window.avatarexport)
         + '&u='     + encodeURIComponent(window.username)
         + '&lg='    + payload.likesGiven
@@ -666,6 +702,16 @@ $(function() {
     //   dem/rep or a/b - absolute
     window.rejector_request = window.QueryString.source || window.QueryString.rejector;
 
+    // roster picks which of the two fixed 5-person teams (TEAM_A/TEAM_B,
+    // set_settings() §8) shows the dem badge vs the rep badge - this is the
+    // counterbalancing for the fixed 5 dem/5 rep roster, so no single bio
+    // is permanently tied to one party across the study. Same alias
+    // pattern: plain `roster` or obscured `rst` (see CLAUDE.md) - `rst`
+    // wins if both are present.
+    //   1 - TEAM_A shows dem, TEAM_B shows rep
+    //   2 - TEAM_A shows rep, TEAM_B shows dem
+    window.roster = window.QueryString.rst || window.QueryString.roster || '1';
+
     // redirect (standalone mode only)
     if (window.QueryString.redirect !== undefined && window.QueryString.redirect !== "") {
       window.redirect = decode(window.QueryString.redirect);
@@ -677,30 +723,31 @@ $(function() {
     }
   }
 
-  // --- Build the mixed majority/minority group -----------------------------
-  // window.rejectorParty is the MAJORITY party (the interaction-source
-  // manipulation, driven by rejector=in/out/dem/rep). Most of the 11 group
-  // members are that party; settings.minority_role_names names the few who
-  // are the other party instead - see set_settings() §8. Every username
-  // exists in both party lists in profiles.js with identical bios, so this
-  // is purely a per-person selection of which party's avatar to use.
+  // --- Build the fixed 5 dem/5 rep roster --------------------------------
+  // TEAM_A/TEAM_B (set_settings() §8) are two fixed 5-person halves of the
+  // 10-person roster. window.roster (1/2, from get_params()) decides which
+  // team shows the dem badge vs the rep badge - the counterbalancing that
+  // replaces the old majority/minority design, so roster composition never
+  // varies with `rejector`. Every username exists in both party lists in
+  // profiles.js with identical bios, so this is purely a per-person
+  // selection of which party's avatar to use.
   function load_profiles() {
     if (typeof window.profiles === 'undefined') {
       alert('Setup error: profiles.js did not load.');
       return;
     }
 
-    var majorityParty = window.rejectorParty;
-    var minorityParty = (majorityParty === 'dem') ? 'rep' : 'dem';
+    var teamADemOrRep = (window.roster === '2') ? 'rep' : 'dem';
+    var teamBDemOrRep = (teamADemOrRep === 'dem') ? 'rep' : 'dem';
 
-    // profiles.dem and profiles.rep list the same 11 usernames in the same
+    // profiles.dem and profiles.rep list the same 10 usernames in the same
     // order, so either can be used as the canonical order to walk.
     var canonical = window.profiles.dem.posts;
 
     window.others = { posts: canonical.map(function(entry) {
-      var party = (window.settings.minority_role_names.indexOf(entry.username) !== -1)
-                ? minorityParty
-                : majorityParty;
+      var party = (window.settings.TEAM_A.indexOf(entry.username) !== -1)
+                ? teamADemOrRep
+                : teamBDemOrRep;
       var source = window.profiles[party].posts.filter(function(p) {
         return p.username === entry.username;
       })[0];
@@ -709,13 +756,34 @@ $(function() {
     }) };
   }
 
+  // --- Resolve which team reacts to the participant ----------------------
+  // Must run AFTER window.party, window.roster, and window.rejectorType are
+  // all known (called from set_party(), right after load_profiles() - see
+  // CLAUDE.md for why this ordering matters). Computes
+  // settings.likes_by/dislikes_by as whichever TEAM_A/TEAM_B (§8) is
+  // in-group or out-group for this participant - `rejector` now controls
+  // WHO reacts, not the roster's composition.
+  function resolve_reactors() {
+    var teamADemOrRep = (window.roster === '2') ? 'rep' : 'dem';
+    var sameTeam = (teamADemOrRep === window.party)
+                 ? window.settings.TEAM_A
+                 : window.settings.TEAM_B;
+    var otherTeam = (sameTeam === window.settings.TEAM_A)
+                  ? window.settings.TEAM_B
+                  : window.settings.TEAM_A;
+
+    var reactingGroup = (window.rejectorType === 'ingroup') ? sameTeam : otherTeam;
+
+    window.settings.likes_by = reactingGroup;
+    window.settings.dislikes_by = reactingGroup;
+  }
+
   // --- Apply the condition ----------------------------------------------
   function adjust_to_condition() {
 
     // posts[1] is always Sarah (canonical position 1, load_profiles()
-    // preserves profiles.dem's order) - the compensating member. Because
-    // she's in minority_role_names, she's now always rendered with the
-    // minority party's avatar for this cell; see set_settings() §8 for why.
+    // preserves profiles.dem's order) - the compensating member,
+    // independent of which team she's on or which party that team shows.
     switch (window.condition) {
       case 1: // REJECTED: few likes, many dislikes
         window.settings.condition_likes    = window.settings.condition_1_likes;

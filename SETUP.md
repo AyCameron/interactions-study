@@ -103,18 +103,26 @@ precise about what the two conditions now do.
 
 |  | Likes received | Dislikes received | Total reactions |
 |---|---|---|---|
-| **Rejected** (`c=1`) | 1 | 5 | 6 |
-| **Included** (`c=2`) | 6 | 0 | 6 |
+| **Rejected** (`c=1`) | 0 | 5 | 5 |
+| **Included** (`c=2`) | 5 | 0 | 5 |
 
-Total reactions are held constant at six and only their **valence** flips. That
-is deliberate: it means both groups receive the same amount of attention, so a
-difference between conditions reflects being evaluated negatively rather than
-being noticed more or less. The original paradigm could not separate those two
-things, because being ostracised there meant receiving fewer reactions overall.
+Total reactions are held constant at five - one from every member of the
+5-person team that reacts to you (CLAUDE.md invariant 3b) - and only their
+**valence** flips: a pure mirror, not a mixed count. That is deliberate: it
+means both groups receive the same amount of attention, so a difference
+between conditions reflects being evaluated negatively rather than being
+noticed more or less. The original paradigm could not separate those two
+things, because being ostracised there meant receiving fewer reactions
+overall. This also matches Lutz & Schneider (2021)'s actual Rejected
+condition more precisely than an earlier version of this build did - see
+CLAUDE.md invariant 2 for the scaling logic (5 is a proportion of group size,
+not the original paper's 6, which was a proportion of an 11-person pool).
 
-Group members' own dislike counts (1, 1, 0, 2, 0) stay identical across
-conditions, so the only thing that varies between a rejected and an included
-participant is how the group treats *them*.
+Group members' own reaction counts on their own posts (visible in the
+background, not sent to you) stay identical across conditions regardless of
+which team reacted to you - see the `likes`/`dislikes` arrays in
+`profiles.js` - so the only thing that varies between a rejected and an
+included participant is how the group treats *them specifically*.
 
 **One design choice you may want to revisit.** `settings.compensate_dislikes` is
 **off** by default. Turning it on would give one group member 5 dislikes in the
@@ -128,9 +136,10 @@ uncompensated totals, but the arrays are there if you disagree.
 **What to call it in the paper.** With the dislike button this is rejection.
 Without it, it was ostracism. Lutz and Schneider (2021) show these are separable
 experiences with partly different consequences, so the label matters. If you want
-both, add a third condition using the original ostracism timings (1 like, 0
-dislikes) alongside rejection (1 like, 5 dislikes) and inclusion — the code
-supports it with one more `case` in `adjust_to_condition()`.
+both, add a third condition using the original ostracism timings (proportionally
+scaled to this project's 5-person reacting team, roughly 1 like, 0 dislikes)
+alongside rejection (0 likes, 5 dislikes) and inclusion (5 likes, 0 dislikes) —
+the code supports it with one more `case` in `adjust_to_condition()`.
 
 **Ethics.** Participants can now dislike the people they meet, and rejected
 participants experience explicit disapproval rather than mere silence. That is a
@@ -150,25 +159,20 @@ or better written, out-group rejection will look milder for Democrats for a
 reason that has nothing to do with party. Matching the two sets on length,
 topic, warmth and writing quality is no longer good practice, it is load-bearing.
 
-**The 11 group members are a majority/minority mix (8/3), not one uniform
-party** - `settings.minority_role_names` in `main.js` fixes which people play
-which role. This softens, but does not remove, the visual-singularity issue
-below: in an *out-group* cell the participant's own badge now matches the 3
-minority members instead of standing alone, while in an *in-group* cell the
-participant still blends into the 8-person majority. Note this in your writeup
-too - "out-group" no longer means "the only different badge in the room," it
-means "the badge shared by the minority."
-
-**In out-group cells the participant is visually distinct from the majority.**
-With one avatar per party, an out-group participant displays a different badge
-from the 8 majority members (though the same badge as the 3 minority members).
-That visual distinctiveness from the majority is itself a mild exclusion cue,
-and it is present in the *included* out-group cell too. It is inherent to the
-design rather than a bug, but name it in your writeup: the out-group
-manipulation is party difference plus visual distinctiveness from the majority,
-not party difference alone. If you want to rule it out, a pilot with party shown
-as a text label beside the username and identical avatars throughout would
-separate the two.
+**RESOLVED: the roster used to be an 8/3 majority/minority mix, which
+confounded the manipulation.** In an out-group cell, the participant's badge
+matched the 3-person minority instead of standing alone; in an in-group cell,
+they blended into an 8-person majority. That meant "out-group" wasn't just
+"rejected by the other party" - it was also "the only visually different
+badge in a smaller subgroup," a confound layered on top of the manipulation
+you actually care about. **Fixed**: the roster is now a flat 5 Democrat / 5
+Republican split in *every* condition (`settings.TEAM_A`/`TEAM_B` in
+`main.js` §8), counterbalanced across sessions by the `roster`/`rst` URL
+parameter (§5a below) so no bio is permanently tied to one party. `rejector`
+now only changes *which team reacts* to the participant, never what the room
+looks like - see `CLAUDE.md` invariant 3b. If you're reading this while
+deciding how to build the roster for the first time, this is why: don't
+reintroduce a composition difference between in-group and out-group cells.
 
 ---
 
@@ -207,9 +211,10 @@ two lists the same length.
 Three things that will otherwise cause trouble:
 
 - Filenames are **case sensitive**. `.PNG` and `.png` are different files.
-- Every name in `settings.likes_by_dem` / `likes_by_rep` must match a `username`
-  in the corresponding profile set. A like from someone who isn't in the group
-  is an obvious tell.
+- Every name in `settings.TEAM_A` / `TEAM_B` (`main.js` §8) must match a
+  `username` in `profiles.js` exactly - these are what `likes_by`/`dislikes_by`
+  get computed from at runtime (CLAUDE.md invariant 6). A like from someone
+  who isn't in the group is an obvious tell.
 - The **second** profile in each list is the compensating member whose likes are
   overwritten to keep the on-screen total constant across conditions. Don't move
   it out of that position without also editing `adjust_to_condition()`.
@@ -390,6 +395,36 @@ straight across; only `affil` actually changes the letters (dem→a, rep→b).
 Then use `affil`/`source` (not `party`/`rejector`) in the new-tab link's
 `href` in §6 - that's the whole point of this step.
 
+## 5b. Counterbalancing the paradigm roster (`roster`/`rst`)
+
+**Needed for every delivery method**, unlike §5a. This isn't a URL-obscuring
+step - `roster` decides which of the two fixed 5-person teams
+(`settings.TEAM_A`/`TEAM_B` in `main.js` §8) shows the dem badge vs. the rep
+badge, so it has to be set before the paradigm loads regardless of iframe or
+new-tab. It follows the same plain/obscured pattern as §5a purely for
+consistency (`CLAUDE.md` invariant 9), not because the value itself is
+sensitive - `1`/`2` doesn't reveal anything on its own.
+
+Declare two more Embedded Data fields at the top of your flow:
+
+```
+Embedded Data: roster = (blank)
+Embedded Data: rst    = (blank)
+```
+
+Add a plain 1-of-2 randomizer anywhere before the paradigm question - it
+doesn't depend on `party` or `rejector`, so it doesn't need to sit inside
+the §5 branches or after them, just somewhere before §6:
+
+```
+Randomizer [Evenly Present Elements - present 1 of 2]
+   ├─ Group 1: Embedded Data: roster = 1  AND  Embedded Data: rst = 1
+   └─ Group 2: Embedded Data: roster = 2  AND  Embedded Data: rst = 2
+```
+
+Use `roster` in the iframe method and for direct/local testing, `rst` in the
+new-tab link's `href` - same rule as `affil`/`source`.
+
 ---
 
 ## 6. Qualtrics: embedding the paradigm
@@ -402,7 +437,7 @@ and paste:
 
 ```html
 <iframe id="ooframe"
-  src="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&rejector=${e://Field/rejector}&p=${e://Field/ResponseID}"
+  src="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&rejector=${e://Field/rejector}&roster=${e://Field/roster}&p=${e://Field/ResponseID}"
   width="100%" height="900" style="border:0;"
   scrolling="yes"></iframe>
 ```
@@ -423,6 +458,7 @@ Qualtrics.SurveyEngine.addOnload(function () {
         Qualtrics.SurveyEngine.setEmbeddedData('OO_party',      e.data.party);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_rejectorparty', e.data.rejectorParty);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_rejectortype',  e.data.rejectorType);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_roster',     e.data.roster);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_username',   e.data.username);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_avatar',     e.data.avatar);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_bio',        e.data.description);
@@ -454,15 +490,18 @@ If the iframe fights you, split into Survey 1 → paradigm → Survey 2. Link
 Survey 1's end-of-survey redirect to:
 
 ```
-https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&rejector=${e://Field/rejector}&p=${e://Field/ResponseID}&redirect=<URL-encoded Survey 2 link>
+https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&party=${e://Field/party}&rejector=${e://Field/rejector}&roster=${e://Field/roster}&p=${e://Field/ResponseID}&redirect=<URL-encoded Survey 2 link>
 ```
 
 Do not drop `rejector` from this URL - without it the paradigm falls back to
 its default (out-group), silently breaking the in-group cells of your design.
+Don't drop `roster` either - without it the paradigm falls back to its
+default (`1`), which means every response in the fallback run would share the
+same counterbalancing direction instead of the 50/50 split §5b sets up.
 
-In Survey 2, declare `p`, `c`, `party`, `rejector`, `rejectorType`, `av`, `u`,
-`lg`, `lw`, `dg`, `dw` as embedded fields at the top of the flow — Qualtrics
-captures matching URL parameters
+In Survey 2, declare `p`, `c`, `party`, `rejector`, `roster`, `rejectorType`,
+`av`, `u`, `lg`, `lw`, `dg`, `dw` as embedded fields at the top of the flow —
+Qualtrics captures matching URL parameters
 automatically. Merge the two exports on `p` afterward. The free-text bio is
 deliberately not sent this way; long text plus URL encoding can exceed browser
 URL limits and truncate silently.
@@ -480,19 +519,21 @@ pasting a raw `<a>` tag into the normal rich-text editor just shows the
 literal tag text on screen instead of a working link.
 
 ```html
-<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&affil=${e://Field/affil}&source=${e://Field/source}&p=${e://Field/ResponseID}" target="_blank" rel="opener">Click here to begin the social network task</a>
+<a id="oolink" href="https://YOURNAME.github.io/group-intro-task/index.html?c=${e://Field/cond}&affil=${e://Field/affil}&source=${e://Field/source}&rst=${e://Field/rst}&p=${e://Field/ResponseID}" target="_blank" rel="opener">Click here to begin the social network task</a>
 ```
 
-This link uses `affil`/`source` rather than `party`/`rejector`. Unlike the
-iframe method, this URL sits in the participant's address bar the whole time
-the second tab is open, so it uses the obscured parameter names/values
-(`affil`: `a`=dem, `b`=rep; `source`: unchanged `in`/`out`) instead of the
-plain readable ones - see CLAUDE.md invariant 9 for why, and its limits.
-This means Survey Flow needs two more Embedded Data fields, `affil` and
-`source`, derived from your existing `party`/`rejector` fields right before
-this question (see §5a below). Don't paste the plain `party=${e://Field/party}
-&rejector=${e://Field/rejector}` form into this particular link - that's what
-this whole obscuring step exists to avoid.
+This link uses `affil`/`source`/`rst` rather than `party`/`rejector`/`roster`.
+Unlike the iframe method, this URL sits in the participant's address bar the
+whole time the second tab is open, so it uses the obscured parameter
+names/values (`affil`: `a`=dem, `b`=rep; `source`: unchanged `in`/`out`;
+`rst`: unchanged `1`/`2`) instead of the plain readable ones - see CLAUDE.md
+invariant 9 for why, and its limits. This means Survey Flow needs two more
+Embedded Data fields, `affil` and `source`, derived from your existing
+`party`/`rejector` fields right before this question (see §5a below); `rst`
+itself is already declared and set by §5b's randomizer, nothing extra needed
+for it here. Don't paste the plain `party=${e://Field/party}
+&rejector=${e://Field/rejector}&roster=${e://Field/roster}` form into this
+particular link - that's what this whole obscuring step exists to avoid.
 
 **`rel="opener"` is required, not optional.** Modern Chrome (and most current
 browsers) silently treat any `target="_blank"` link as if `rel="noopener"`
@@ -561,6 +602,7 @@ Qualtrics.SurveyEngine.addOnload(function () {
         Qualtrics.SurveyEngine.setEmbeddedData('OO_party',      e.data.party);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_rejectorparty', e.data.rejectorParty);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_rejectortype',  e.data.rejectorType);
+        Qualtrics.SurveyEngine.setEmbeddedData('OO_roster',     e.data.roster);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_username',   e.data.username);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_avatar',     e.data.avatar);
         Qualtrics.SurveyEngine.setEmbeddedData('OO_bio',        e.data.description);
@@ -602,37 +644,43 @@ Open each of these eight links directly and click all the way through. The
 `rejector=in` / `rejector=out` form is what Qualtrics will actually send.
 
 ```
-?c=1&party=dem&rejector=out&p=TEST_D_REJ_OUT     rejected by Republicans
-?c=2&party=dem&rejector=out&p=TEST_D_INC_OUT     included by Republicans
-?c=1&party=dem&rejector=in&p=TEST_D_REJ_IN       rejected by fellow Democrats
-?c=2&party=dem&rejector=in&p=TEST_D_INC_IN       included by fellow Democrats
-?c=1&party=rep&rejector=out&p=TEST_R_REJ_OUT     rejected by Democrats
-?c=2&party=rep&rejector=out&p=TEST_R_INC_OUT     included by Democrats
-?c=1&party=rep&rejector=in&p=TEST_R_REJ_IN       rejected by fellow Republicans
-?c=2&party=rep&rejector=in&p=TEST_R_INC_IN       included by fellow Republicans
+?c=1&party=dem&rejector=out&roster=1&p=TEST_D_REJ_OUT     rejected by Republicans
+?c=2&party=dem&rejector=out&roster=1&p=TEST_D_INC_OUT     included by Republicans
+?c=1&party=dem&rejector=in&roster=1&p=TEST_D_REJ_IN       rejected by fellow Democrats
+?c=2&party=dem&rejector=in&roster=1&p=TEST_D_INC_IN       included by fellow Democrats
+?c=1&party=rep&rejector=out&roster=2&p=TEST_R_REJ_OUT     rejected by Democrats
+?c=2&party=rep&rejector=out&roster=2&p=TEST_R_INC_OUT     included by Democrats
+?c=1&party=rep&rejector=in&roster=2&p=TEST_R_REJ_IN       rejected by fellow Republicans
+?c=2&party=rep&rejector=in&roster=2&p=TEST_R_INC_IN       included by fellow Republicans
 ```
 
 (Prefix each with `https://YOURNAME.github.io/group-intro-task/index.html`.)
+`roster` isn't part of the manipulated design (CLAUDE.md invariant 3b), so it
+doesn't need its own set of cells - the eight above just alternate `1`/`2` so
+you've seen both counterbalancing directions at least once each.
 
 For each one, confirm:
 
 - [ ] The participant is assigned the correct party's avatar (or shown it for confirmation, if you turned the screen back on)
 - [ ] Your own post displays your chosen avatar, not a broken image
-- [ ] Of the 11 group members, 8 show the majority party's avatar and 3 show
-      the minority party's (`settings.minority_role_names` in `main.js`) - not
-      all 11 the same
-- [ ] In `rejector=in` cells the participant's avatar matches the 8 majority
-      members; in `rejector=out` cells it matches the 3 minority members instead
-- [ ] Every reaction popup names someone from the correct party for their role
-      (majority or minority) - 5 of the 6 reactions are majority-authored, 1 is
-      minority-authored (Kim), in every cell
-- [ ] You count the likes you receive: 1 in condition 1, 6 in condition 2
+- [ ] Of the 10 group members, exactly 5 show the Democratic avatar and 5 show
+      the Republican avatar (`settings.TEAM_A`/`TEAM_B` in `main.js` §8) -
+      never a different split, regardless of `c`, `rejector`, or `roster`
+- [ ] Which 5 show which party flips between `roster=1` and `roster=2` -
+      compare a `roster=1` load against a `roster=2` load and confirm the two
+      teams have swapped badges
+- [ ] Every reaction popup names someone from the same 5-person team, and that
+      team is the in-group team when `rejector=in`, the out-group team when
+      `rejector=out` (invariant 3b) - never a mix of both teams in one session
+- [ ] You count the likes you receive: 0 in condition 1, 5 in condition 2
 - [ ] You count the dislikes you receive: 5 in condition 1, 0 in condition 2
 - [ ] Dislike popups appear in red, like popups in green
 - [ ] Clicking Like disables the Dislike button on that post, and vice versa
 - [ ] Both buttons fit inside the post box without overlapping the counters
 - [ ] The total likes across all posts is the same in both conditions
 - [ ] Every popup name corresponds to a profile visible on screen
+- [ ] The persistent reaction feed (next to the timer) fills in alongside each
+      toast and keeps every entry for the rest of the task, never clearing
 - [ ] Press F12 → Console shows no red errors, Network shows no failed loads
 - [ ] The profile order differs between two loads of the same link
 
