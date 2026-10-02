@@ -60,6 +60,10 @@ img.avatar {
   margin-bottom: 0;
 }
 
+/* #task is listed too because Masonry only adds the "masonry" class to it
+   after taking its first width measurement; without this the first layout
+   sees the full .container width and packs a 4th column over the sidebar. */
+#task,
 div.masonry {
     width: 850px;
 }
