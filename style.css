@@ -3,8 +3,8 @@ body {
 }
 
 .container {
-	width: 800px;
-} 
+	width: 1060px;
+}
 
 .tophalf {
 	margin-bottom: 0px !important;
@@ -237,11 +237,22 @@ span.cntr.label.label-info {
     background-color: #707070;
 }
 
-#countdown {
+/* #task is div.masonry's own container (Masonry.js adds the "masonry"
+   class directly to #task), so #countdown - as #task's direct child -
+   floating right would resolve against #task's 850px width, not the
+   outer .container, and collide with the post grid packed into that
+   same 850px. Taking it out of flow with position:absolute, anchored
+   to #task (hence #task needing position:relative below), places it
+   just outside the masonry box instead, so it never affects Masonry's
+   own column packing. */
+#task {
 	position: relative;
-	float:right;
+}
+
+#countdown {
+	position: absolute;
+	right: -170px;
 	width: 160px;
-	padding-right: -50px;
 	top: 40px;
 	text-align:left;
   color: #858585;
