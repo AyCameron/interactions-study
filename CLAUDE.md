@@ -48,18 +48,24 @@ but don't assume the current between-subjects Qualtrics build is settled.
    is the party of the team that reacts to the participant (see 3b) — ALL of
    the participant's reactions come from it now, not most.
 
-2. **Total reactions to the participant's post are held constant at 5, a pure
-   valence mirror.** Rejected = 0 likes + 5 dislikes. Included = 5 likes + 0
-   dislikes. Nothing mixed, unlike the earlier 1-like/5-dislike design this
-   replaced - see SETUP.md for why 5, not the original paper's 6 (it's a
-   proportion of group size, not a universal constant, and 5 is that
-   proportion scaled to this project's 5-person reacting team, invariant 3b).
-   If you touch `condition_*_likes` or `condition_*_dislikes`, recount both
-   totals and say so explicitly in your reply.
+2. **Total reactions to the participant's post are held constant at 5, one
+   from each member of the 5-person reacting team (invariant 3b).** Rejected =
+   4 dislikes + 1 like. Included = 5 likes, 0 dislikes. This is deliberately
+   asymmetric: the single like in rejected is there for realism, while
+   inclusion stays at full strength (one dislike would likely hurt inclusion
+   more than one like softens rejection). It departs from the pure
+   all-dislikes vs all-likes mirror in Lutz & Schneider (2021), so it must be
+   reported in methods, and suspicion and manipulation checks should be
+   compared by condition. Both conditions use the same five timing slots
+   (12s, 35s, 70s, 105s, 140s). In rejected the first slot is the like, always
+   from the reacting team's last member (`resolve_reactors()`). 5 is the
+   original paper's "roughly half the group" scaled to a 5-person team (see
+   SETUP.md). If you touch `condition_*_likes` or `condition_*_dislikes`,
+   recount both totals and say so explicitly in your reply.
 
 3. **Total likes visible on screen are held constant across conditions** via the
-   compensating group member at canonical position 1 (Sarah). Participant 0 +
-   peer 9 = participant 5 + peer 4 = 9. Moving her out of position 1 breaks
+   compensating group member at canonical position 1 (Sarah). Participant 1 +
+   peer 8 = participant 5 + peer 4 = 9. Moving her out of position 1 breaks
    `adjust_to_condition()`.
 
 3b. **The roster is a fixed 5 Democrat / 5 Republican split in EVERY condition,
@@ -175,7 +181,7 @@ Gotchas specific to this version:
   `180000` before committing either way.
 
 Check: no console errors, no broken images, the party self-report screen
-actually gates progress, reaction counts match the design table (0 likes/5
+actually gates progress, reaction counts match the design table (1 like/4
 dislikes rejected, 5 likes/0 dislikes included — invariant 2), all 5
 reactions come from the same team every time (invariant 3b), the roster
 always shows 5 dem/5 rep regardless of condition, the closing message

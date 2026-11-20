@@ -103,18 +103,22 @@ precise about what the two conditions now do.
 
 |  | Likes received | Dislikes received | Total reactions |
 |---|---|---|---|
-| **Rejected** (`c=1`) | 0 | 5 | 5 |
+| **Rejected** (`c=1`) | 1 | 4 | 5 |
 | **Included** (`c=2`) | 5 | 0 | 5 |
 
 Total reactions are held constant at five - one from every member of the
-5-person team that reacts to you (CLAUDE.md invariant 3b) - and only their
-**valence** flips: a pure mirror, not a mixed count. That is deliberate: it
-means both groups receive the same amount of attention, so a difference
-between conditions reflects being evaluated negatively rather than being
-noticed more or less. The original paradigm could not separate those two
-things, because being ostracised there meant receiving fewer reactions
-overall. This also matches Lutz & Schneider (2021)'s actual Rejected
-condition more precisely than an earlier version of this build did - see
+5-person team that reacts to you (CLAUDE.md invariant 3b) - and the
+**valence** flips. That is deliberate: both groups receive the same amount of
+attention, so a difference between conditions reflects being evaluated
+negatively rather than being noticed more or less. The original paradigm could
+not separate those two things, because being ostracised there meant receiving
+fewer reactions overall. The rejected condition includes one like, which comes
+first (12 seconds) from the reacting team's last member, so the group does not
+look unanimous. Inclusion stays all likes so it keeps full strength, since one
+dislike would likely hurt inclusion more than one like softens rejection. The
+design is therefore deliberately asymmetric. **Report this in methods:** Lutz &
+Schneider (2021)'s Rejected condition is a pure mirror (all dislikes vs all
+likes), and compare suspicion and manipulation checks by condition. See
 CLAUDE.md invariant 2 for the scaling logic (5 is a proportion of group size,
 not the original paper's 6, which was a proportion of an 11-person pool).
 
@@ -125,12 +129,12 @@ which team reacted to you - see the `likes`/`dislikes` arrays in
 included participant is how the group treats *them specifically*.
 
 **One design choice you may want to revisit.** `settings.compensate_dislikes` is
-**off** by default. Turning it on would give one group member 5 dislikes in the
-included condition, mirroring the participant's 5 in the rejected condition, to
-hold the total dislikes on screen constant. The cost is that included
-participants would then watch a peer get savaged while they got nothing but
-likes — a strong downward social comparison that can lift self-esteem on its own
-and confound your inclusion condition. I would leave it off and report the
+**off** by default. Turning it on would give one group member 4 dislikes in the
+included condition, so the participant's and that member's dislikes total 4 in
+both conditions, holding the dislikes on screen constant. The cost is that
+included participants would then watch a peer get disliked while they got
+nothing but likes — a strong downward social comparison that can lift
+self-esteem on its own and confound your inclusion condition. I would leave it off and report the
 uncompensated totals, but the arrays are there if you disagree.
 
 **What to call it in the paper.** With the dislike button this is rejection.
@@ -138,7 +142,7 @@ Without it, it was ostracism. Lutz and Schneider (2021) show these are separable
 experiences with partly different consequences, so the label matters. If you want
 both, add a third condition using the original ostracism timings (proportionally
 scaled to this project's 5-person reacting team, roughly 1 like, 0 dislikes)
-alongside rejection (0 likes, 5 dislikes) and inclusion (5 likes, 0 dislikes) —
+alongside rejection (1 like, 4 dislikes) and inclusion (5 likes, 0 dislikes) —
 the code supports it with one more `case` in `adjust_to_condition()`.
 
 **Ethics.** Participants can now dislike the people they meet, and rejected
@@ -672,8 +676,10 @@ For each one, confirm:
 - [ ] Every reaction popup names someone from the same 5-person team, and that
       team is the in-group team when `rejector=in`, the out-group team when
       `rejector=out` (invariant 3b) - never a mix of both teams in one session
-- [ ] You count the likes you receive: 0 in condition 1, 5 in condition 2
-- [ ] You count the dislikes you receive: 5 in condition 1, 0 in condition 2
+- [ ] You count the likes you receive: 1 in condition 1, 5 in condition 2
+- [ ] You count the dislikes you receive: 4 in condition 1, 0 in condition 2
+- [ ] When rejected, the first reaction (about 12 seconds) is the one like;
+      no name appears twice in either condition
 - [ ] Dislike popups appear in red, like popups in green
 - [ ] Clicking Like disables the Dislike button on that post, and vice versa
 - [ ] Both buttons fit inside the post box without overlapping the counters

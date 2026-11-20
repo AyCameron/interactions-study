@@ -90,14 +90,15 @@ $(function() {
     // A dummy value of 9999999 pads a one-item list; it is never reached
     // because it is longer than the task.
     //
-    // Rejected/Included mirror each other exactly (0 vs 5, matching 4b's
-    // 5 vs 0 dislikes) - see 4b for why 5, not 6.
+    // Both conditions use the same five reaction slots (12s, 35s, 70s, 105s,
+    // 140s). In REJECTED the first slot (12s) is the single like and the
+    // other four are dislikes; in INCLUDED all five slots are likes. See 4b.
 
-    // CONDITION 1 = REJECTED (0 likes; the dummy timepoint never fires)
-    settings.condition_1_likes = [9999999];
+    // CONDITION 1 = REJECTED (1 like, first slot)
+    settings.condition_1_likes = [12000];
 
-    // CONDITION 2 = INCLUDED (5 likes)
-    settings.condition_2_likes = [10000, 35000, 80000, 132000, 150000];
+    // CONDITION 2 = INCLUDED (5 likes, every slot)
+    settings.condition_2_likes = [12000, 35000, 70000, 105000, 140000];
 
     // ---------------------------------------------------------------
     // 4b. NUMBER AND TIMING OF "DISLIKES" THE PARTICIPANT RECEIVES
@@ -105,19 +106,20 @@ $(function() {
     // This is what turns condition 1 from OSTRACISM (being ignored) into
     // REJECTION (being actively disapproved of).
     //
-    // Rejected and Included are now pure mirror images - all-dislikes vs.
-    // all-likes, nothing mixed - matching Lutz & Schneider's (2021)
-    // rejection extension of Wolf et al. (2015), where Rejected mirrors
-    // Included exactly. The original paper's counts (6 likes/12/1, out of
-    // an 11-person pool) aren't universal constants - they're roughly
-    // "half the group," and 5 is that same proportion scaled to this
-    // project's fixed 5-person reacting team (§8) instead of 11 people.
-    // 5 reactions from 5 people also means every reaction maps to a
-    // different named person with no repeats. Change these only
-    // deliberately, and keep both conditions' totals equal if you do.
+    // Each condition delivers 5 reactions from the 5-person reacting team
+    // (§8), one from each member, so no name repeats. Rejected = 4 dislikes
+    // + 1 like (the single like is added for realism, since a group is
+    // rarely unanimous). Included = 5 likes, no dislikes, so inclusion is
+    // kept at full strength: one dislike would likely hurt inclusion more
+    // than one like softens rejection. This is deliberately asymmetric and
+    // departs from the pure all-dislikes vs all-likes mirror in Lutz &
+    // Schneider (2021), so report it in methods, and compare suspicion and
+    // manipulation checks by condition. In rejected the like always arrives
+    // first (12s) from the team's last member (resolve_reactors()). Change
+    // these only deliberately, and keep both conditions' totals equal.
 
-    // CONDITION 1 = REJECTED (5 dislikes)
-    settings.condition_1_dislikes = [20000, 45000, 70000, 105000, 140000];
+    // CONDITION 1 = REJECTED (4 dislikes, the four slots after the first)
+    settings.condition_1_dislikes = [35000, 70000, 105000, 140000];
 
     // CONDITION 2 = INCLUDED (0 dislikes; the dummy timepoint never fires)
     settings.condition_2_dislikes = [9999999];
@@ -141,19 +143,22 @@ $(function() {
     // both conditions, one group member's likes move in the opposite
     // direction. This member is the one at position 1 (the second entry)
     // in each profile list in profiles.js.
-    settings.condition_1_adjusted_likes = [12000, 14000, 15000, 35000, 80000, 100000, 110000, 150000, 20000]; // 9
+    // Participant likes + this member's likes = 9 in both conditions
+    // (rejected 1 + 8, included 5 + 4).
+    settings.condition_1_adjusted_likes = [12000, 14000, 15000, 35000, 80000, 100000, 110000, 150000]; // 8
     settings.condition_2_adjusted_likes = [12000, 14000, 15000, 35000]; // 4
 
     // The same idea can be applied to DISLIKES, but think before you do.
     // Turning this on means that in the INCLUDED condition one group member
-    // receives 5 dislikes while the participant receives none - a strong
+    // receives 4 dislikes while the participant receives none - a strong
     // downward social comparison that could raise self-esteem on its own and
     // confound your inclusion condition. Off by default: group members'
     // dislike counts stay exactly as written in profiles.js in both
     // conditions, and only the participant's own dislikes vary.
+    // (If enabled: participant + this member = 4 dislikes in both conditions.)
     settings.compensate_dislikes = false;
-    settings.condition_1_adjusted_dislikes = [9999999];                        // 0
-    settings.condition_2_adjusted_dislikes = [25000, 55000, 90000, 120000, 155000]; // 5
+    settings.condition_1_adjusted_dislikes = [9999999];                   // 0
+    settings.condition_2_adjusted_dislikes = [25000, 55000, 90000, 120000]; // 4
 
     // ---------------------------------------------------------------
     // 6. WHO THE PARTICIPANT'S LIKES APPEAR TO COME FROM
@@ -774,8 +779,20 @@ $(function() {
 
     var reactingGroup = (window.rejectorType === 'ingroup') ? sameTeam : otherTeam;
 
-    window.settings.likes_by = reactingGroup;
-    window.settings.dislikes_by = reactingGroup;
+    // Every member reacts exactly once. INCLUDED: all five like (the dislike
+    // list is never reached, condition_2_dislikes is the dummy timepoint).
+    // REJECTED: the team's last member gives the single like (first slot)
+    // and the other four give the dislikes.
+    var odd  = reactingGroup[reactingGroup.length - 1];
+    var rest = reactingGroup.slice(0, reactingGroup.length - 1);
+
+    if (window.condition === 2) { // INCLUDED: 5 likes
+      window.settings.likes_by = reactingGroup;
+      window.settings.dislikes_by = reactingGroup;
+    } else {                      // REJECTED: 1 like + 4 dislikes
+      window.settings.likes_by = [odd];
+      window.settings.dislikes_by = rest;
+    }
   }
 
   // --- Apply the condition ----------------------------------------------
