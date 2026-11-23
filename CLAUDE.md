@@ -26,7 +26,7 @@ but don't assume the current between-subjects Qualtrics build is settled.
 |---|---|
 | `index.html` | All screens and all participant-facing text; two Mustache templates at the bottom |
 | `main.js` | All logic. Editable parameters are in `set_settings()` at the top, in numbered sections |
-| `profiles.js` | The ten fake group members, in a Democratic and a Republican version (identical bios, only the avatar differs). Despite the original's `.json` name this is JavaScript |
+| `profiles.js` | The ten group members, in a Democratic and a Republican version (identical bios, only the avatar differs). The bios are adapted writing by earlier participants. Despite the original's `.json` name this is JavaScript |
 | `style.css` | Appearance. Dislike-button styles are in a marked block at the bottom |
 | `shortcut.js` | Vendored keyboard library, untouched from the original |
 | `avatars/` | Exactly two images: `dem.png` (donkey on blue) and `rep.png` (elephant on red), 250x250 RGBA with transparent corners. One badge per party, used by the participant and the group members — always a fixed 5 dem/5 rep split, counterbalanced across sessions by `roster` (invariant 3b) |
@@ -95,7 +95,11 @@ but don't assume the current between-subjects Qualtrics build is settled.
 
 5. **The Democratic and Republican profile sets must stay matched** on bio
    length, topics, warmth, and apparent age/gender mix. The only intended
-   difference is the partisan cue.
+   difference is the partisan cue. The bios are lightly edited, de-identified
+   writing by real earlier participants (five Democrat-written, five
+   Republican-written, randomly assigned with each team getting a mix), and
+   the dem and rep versions of each name carry identical text. Keep every bio
+   free of party names, attacks on the other side, and identifying detail.
 
 5b. **There is one avatar per party, shared by everyone on screen.** It is a
    party badge, not a profile picture. `dem.png` and `rep.png` must be matched

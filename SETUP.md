@@ -172,7 +172,7 @@ badge in a smaller subgroup," a confound layered on top of the manipulation
 you actually care about. **Fixed**: the roster is now a flat 5 Democrat / 5
 Republican split in *every* condition (`settings.TEAM_A`/`TEAM_B` in
 `main.js` §8), counterbalanced across sessions by the `roster`/`rst` URL
-parameter (§5a below) so no bio is permanently tied to one party. `rejector`
+parameter (§5b below) so no bio is permanently tied to one party. `rejector`
 now only changes *which team reacts* to the participant, never what the room
 looks like - see `CLAUDE.md` invariant 3b. If you're reading this while
 deciding how to build the roster for the first time, this is why: don't
